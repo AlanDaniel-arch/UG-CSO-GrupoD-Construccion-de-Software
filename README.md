@@ -61,23 +61,23 @@ El aporte de cada integrante se comprueba en el historial de commits, así que c
 
 ## Tecnologías
 
-| Elemento | Elección |
-|---|---|
+| Componente | Tecnología |
+| :--- | :--- |
 | Lenguaje | C# (.NET 8.0) |
 | IDE | Visual Studio 2022 / Visual Studio Code |
 | Framework / Librerías | .NET 8.0, MySql.Data |
 | Base de datos | MySQL 8.0 |
-| Pruebas unitarias | xUnit / MSTest (previsto U1-S5) |
+| Pruebas unitarias | xUnit / MSTest (previsto en U1-S5) |
 | Control de versiones | Git + GitHub |
+
 ## Cómo abrir y ejecutar el proyecto
 
 _Requisito de todas las entregas. Se completa con la primera versión del código._
 
-1. **Requisitos previos:** Tener instalado **.NET 8.0 SDK** (o superior), **MySQL Server 8.0** y **Visual Studio 2022** o **Visual Studio Code**.
-2. **Clonar el repositorio:**
+1. Requisitos previos: Tener instalado .NET 8.0 SDK (o superior), MySQL Server 8.0 y Visual Studio 2022.
+2. Clonar el repositorio:
    ```bash
-   git clone [https://github.com/AlanDaniel-arch/UG-CSO-GrupoD-Construccion-de-Software.git](https://github.com/AlanDaniel-arch/UG-CSO-GrupoD-Construccion-de-Software.git)
-
+   git clone https://github.com/AlanDaniel-arch/UG-CSO-GrupoD-Construccion-de-Software.git
 ---
 
 ## Estructura
