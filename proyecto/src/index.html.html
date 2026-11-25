@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Gestión de Clientes, Planes y Facturación para ISP</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .tab-active { background: linear-gradient(135deg, #1e3a5f, #2563a8); color: #ffffff; box-shadow: 0 4px 12px rgba(30,58,95,.25); }
+    .subtab-active { border-bottom: 2px solid #2563a8; color: #1e3a5f; font-weight: 600; }
+
+    /* ===== Mejoras de diseño ===== */
+    body { background: radial-gradient(1200px 500px at 90% -10%, #dbeafe 0%, transparent 60%), #f1f5f9; }
+    .app-header { background: linear-gradient(110deg, #0b2447 0%, #1e3a5f 45%, #1d6fa5 100%); }
+    .view-section { animation: fadeUp .35s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    #kpi-grid > div, .view-section .rounded-xl.shadow-sm { transition: transform .2s ease, box-shadow .2s ease; }
+    #kpi-grid > div:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -8px rgba(30,58,95,.25); }
+    #kpi-grid > div { border-radius: 1rem; border-top: 3px solid #2563a8; }
+    table tbody tr { transition: background-color .15s ease; }
+    table tbody tr:hover { background-color: #f0f7ff; }
+    table thead th { letter-spacing: .04em; }
+    .view-section h2 { letter-spacing: -.01em; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #2563a8; outline-offset: 2px; }
+    input, select, textarea { transition: border-color .15s, box-shadow .15s; }
+    input:focus, select:focus, textarea:focus { border-color: #2563a8 !important; box-shadow: 0 0 0 3px rgba(37,99,168,.15); outline: none; }
+    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+    .login-bg { background: radial-gradient(900px 500px at 15% 10%, #1d6fa5 0%, transparent 60%), linear-gradient(135deg, #0b2447, #1e3a5f); }
+    .role-card { transition: all .15s ease; }
+    .role-card:hover { transform: translateY(-2px); border-color: #2563a8; background: #f0f7ff; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Top Header -->
+  <header class="app-header text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-sky-400/20 border border-sky-300/30 flex items-center justify-center shrink-0">
+          <i data-lucide="wifi" class="w-5 h-5 text-sky-300"></i>
+        </div>
+        <div class="truncate">
+          <h1 class="text-sm sm:text-base font-bold leading-tight truncate">ISP Manager</h1>
+          <p class="text-xs text-sky-200 truncate">Sistema de Gestión de Clientes, Planes y Facturación</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-export-pdf" type="button" class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-[#1e3a5f] hover:bg-sky-50 px-3 py-1.5 rounded-lg transition shadow-sm" title="Exportar reporte en PDF">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Exportar PDF</span><span class="sm:hidden">PDF</span>
+        </button>
+        <button id="btn-export-json" type="button" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar JSON
+        </button>
+        <button id="btn-reset-demo" type="button" class="inline-flex items-center gap-1.5 text-xs font-medium bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition" title="Restaurar datos de ejemplo">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Restaurar demo</span>
+        </button>
+        <div class="hidden md:flex items-center gap-2 pl-2 ml-1 border-l border-white/20">
+          <div class="w-8 h-8 rounded-full bg-sky-300/20 border border-sky-200/30 flex items-center justify-center"><i data-lucide="user" class="w-4 h-4 text-sky-200"></i></div>
+          <div class="leading-tight">
+            <p id="user-name" class="text-xs font-semibold">—</p>
+            <p id="user-role" class="text-[10px] text-sky-200">—</p>
+          </div>
+        </div>
+        <button id="btn-logout" type="button" class="inline-flex items-center gap-1.5 text-xs font-medium bg-red-500/80 hover:bg-red-500 px-3 py-1.5 rounded-lg transition" title="Cerrar sesión">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Salir</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 text-slate-600">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-1.5 overflow-x-auto">
+        <button type="button" data-view="dashboard" class="nav-btn tab-active inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Panel General
+        </button>
+        <button type="button" data-view="clientes" class="nav-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap hover:bg-slate-100 transition">
+          <i data-lucide="users" class="w-4 h-4"></i> Clientes y Contratos
+        </button>
+        <button type="button" data-view="planes" class="nav-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap hover:bg-slate-100 transition">
+          <i data-lucide="router" class="w-4 h-4"></i> Planes y Equipos
+        </button>
+        <button type="button" data-view="facturacion" class="nav-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap hover:bg-slate-100 transition">
+          <i data-lucide="receipt" class="w-4 h-4"></i> Facturación y Pagos
+        </button>
+        <button type="button" data-view="soporte" class="nav-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap hover:bg-slate-100 transition">
+          <i data-lucide="headphones" class="w-4 h-4"></i> Servicio y Soporte
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+
+    <!-- VIEW 1: DASHBOARD -->
+    <section id="view-dashboard" class="view-section space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Panel General de Operación ISP</h2>
+          <p class="text-sm text-slate-500">Resumen en tiempo real de clientes, planes, facturación y soporte técnico.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="quick-add-client" type="button" class="inline-flex items-center gap-1.5 bg-[#1e3a5f] hover:bg-[#162d4a] text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo Cliente
+          </button>
+          <button id="quick-add-invoice" type="button" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition">
+            <i data-lucide="file-plus" class="w-4 h-4"></i> Emitir Factura
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- Two-column Dashboard Summaries -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-semibold text-slate-800 text-sm">Facturas Pendientes Recientes</h3>
+            <button type="button" data-jump="facturacion" class="jump-btn text-xs font-medium text-sky-700 hover:underline">Ver todas</button>
+          </div>
+          <div id="dash-pending-invoices" class="divide-y divide-slate-100 text-sm"></div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-semibold text-slate-800 text-sm">Solicitudes de Soporte Activas</h3>
+            <button type="button" data-jump="soporte" class="jump-btn text-xs font-medium text-sky-700 hover:underline">Gestionar soporte</button>
+          </div>
+          <div id="dash-open-tickets" class="divide-y divide-slate-100 text-sm"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: CLIENTES Y CONTRATOS -->
+    <section id="view-clientes" class="view-section hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Módulo 1: Gestión de Clientes y Contratos</h2>
+          <p class="text-sm text-slate-500">Registro, consulta, búsqueda y actualización de clientes y contratos vigentes.</p>
+        </div>
+        <button id="btn-open-client-modal" type="button" class="inline-flex items-center justify-center gap-1.5 bg-[#1e3a5f] hover:bg-[#162d4a] text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Registrar Cliente y Contrato
+        </button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="search-clients" type="text" placeholder="Buscar por cédula/RUC, nombre o código de contrato..." class="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+        <select id="filter-contract-status" class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <option value="ALL">Todos los estados</option>
+          <option value="Activo">Activo</option>
+          <option value="Suspendido">Suspendido</option>
+          <option value="Cancelado">Cancelado</option>
+        </select>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Identificación</th>
+              <th class="px-4 py-3 font-semibold">Cliente y Contacto</th>
+              <th class="px-4 py-3 font-semibold">Contrato</th>
+              <th class="px-4 py-3 font-semibold">Plan Contratado</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="clients-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PLANES Y EQUIPOS -->
+    <section id="view-planes" class="view-section hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Módulo 2: Gestión de Planes y Equipos</h2>
+          <p class="text-sm text-slate-500">Catálogo de planes de internet e inventario de equipos CPE/ONT asignados.</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-open-plan-modal" type="button" class="inline-flex items-center gap-1.5 bg-[#1e3a5f] hover:bg-[#162d4a] text-white text-sm font-medium px-3.5 py-2 rounded-lg transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Plan
+          </button>
+          <button id="btn-open-equip-modal" type="button" class="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium px-3.5 py-2 rounded-lg transition">
+            <i data-lucide="cpu" class="w-4 h-4"></i> Nuevo Equipo
+          </button>
+        </div>
+      </div>
+
+      <div class="border-b border-slate-200 flex gap-6 text-sm">
+        <button type="button" data-subtab="planes-list" class="planes-subtab subtab-active pb-2.5 transition">Planes de Internet</button>
+        <button type="button" data-subtab="equipos-list" class="planes-subtab text-slate-500 hover:text-slate-800 pb-2.5 transition">Equipos Asociados</button>
+      </div>
+
+      <!-- Planes Panel -->
+      <div id="subpanel-planes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- Equipos Panel -->
+      <div id="subpanel-equipos-list" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Código</th>
+              <th class="px-4 py-3 font-semibold">Tipo / Marca y Modelo</th>
+              <th class="px-4 py-3 font-semibold">N.º de Serie</th>
+              <th class="px-4 py-3 font-semibold">Cliente / Contrato</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="equipos-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW 4: FACTURACIÓN Y PAGOS -->
+    <section id="view-facturacion" class="view-section hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Módulo 3: Facturación y Registro de Pagos</h2>
+          <p class="text-sm text-slate-500">Emisión de facturas mensuales, control de vencimientos e historial de cobros.</p>
+        </div>
+        <button id="btn-open-invoice-modal" type="button" class="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+          <i data-lucide="file-plus" class="w-4 h-4"></i> Emitir Factura
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2">
+        <div class="flex gap-6 text-sm">
+          <button type="button" data-subtab="facturas-list" class="fact-subtab subtab-active pb-2 transition">Facturas</button>
+          <button type="button" data-subtab="pagos-list" class="fact-subtab text-slate-500 hover:text-slate-800 pb-2 transition">Historial de Pagos</button>
+        </div>
+        <select id="filter-invoice-status" class="text-sm border border-slate-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <option value="ALL">Todas las facturas</option>
+          <option value="Pendiente">Pendientes</option>
+          <option value="Pagada">Pagadas</option>
+          <option value="Vencida">Vencidas</option>
+        </select>
+      </div>
+
+      <div id="subpanel-facturas-list" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Código</th>
+              <th class="px-4 py-3 font-semibold">Cliente / Contrato</th>
+              <th class="px-4 py-3 font-semibold">Emisión / Vencimiento</th>
+              <th class="px-4 py-3 font-semibold">Valor Total</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="facturas-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+
+      <div id="subpanel-pagos-list" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Código Pago</th>
+              <th class="px-4 py-3 font-semibold">Factura</th>
+              <th class="px-4 py-3 font-semibold">Cliente</th>
+              <th class="px-4 py-3 font-semibold">Fecha de Pago</th>
+              <th class="px-4 py-3 font-semibold">Método</th>
+              <th class="px-4 py-3 font-semibold text-right">Valor Pagado</th>
+            </tr>
+          </thead>
+          <tbody id="pagos-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW 5: ESTADO DE SERVICIO Y SOPORTE -->
+    <section id="view-soporte" class="view-section hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Módulo 4: Estado de Servicio y Soporte Básico</h2>
+          <p class="text-sm text-slate-500">Monitoreo de estados de conexión y seguimiento de tickets de soporte técnico.</p>
+        </div>
+        <button id="btn-open-ticket-modal" type="button" class="inline-flex items-center justify-center gap-1.5 bg-[#1e3a5f] hover:bg-[#162d4a] text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Nueva Solicitud de Soporte
+        </button>
+      </div>
+
+      <!-- Atención al cliente: contacto + QR a WhatsApp -->
+      <div class="bg-gradient-to-r from-[#1e3a5f] to-[#1d6fa5] text-white rounded-2xl p-5 sm:p-6 shadow-md flex flex-col sm:flex-row items-center gap-5">
+        <div class="bg-white p-2.5 rounded-xl shadow-inner shrink-0">
+          <div id="qr-whatsapp" class="w-[132px] h-[132px] flex items-center justify-center text-slate-400 text-xs text-center"></div>
+        </div>
+        <div class="flex-1 text-center sm:text-left space-y-2">
+          <div class="inline-flex items-center gap-1.5 bg-white/15 text-xs font-medium px-2.5 py-1 rounded-full">
+            <i data-lucide="headphones" class="w-3.5 h-3.5"></i> Servicio al cliente
+          </div>
+          <h3 class="text-lg font-bold">¿Necesitas ayuda con tu servicio?</h3>
+          <p class="text-sm text-sky-100">Escanea el código QR y te atenderemos directamente por WhatsApp, o contáctanos por los siguientes medios.</p>
+          <div class="flex flex-col sm:flex-row sm:flex-wrap gap-x-6 gap-y-1 text-sm pt-1">
+            <span class="inline-flex items-center justify-center sm:justify-start gap-2"><i data-lucide="phone" class="w-4 h-4 text-sky-200"></i> <span id="contact-phone"></span></span>
+            <span class="inline-flex items-center justify-center sm:justify-start gap-2"><i data-lucide="mail" class="w-4 h-4 text-sky-200"></i> <span id="contact-mail"></span></span>
+            <span class="inline-flex items-center justify-center sm:justify-start gap-2"><i data-lucide="clock" class="w-4 h-4 text-sky-200"></i> <span id="contact-hours"></span></span>
+          </div>
+          <a id="btn-whatsapp" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Abrir WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="border-b border-slate-200 flex gap-6 text-sm">
+        <button type="button" data-subtab="servicios-list" class="soporte-subtab subtab-active pb-2.5 transition">Estado de Servicios</button>
+        <button type="button" data-subtab="tickets-list" class="soporte-subtab text-slate-500 hover:text-slate-800 pb-2.5 transition">Solicitudes de Soporte</button>
+      </div>
+
+      <div id="subpanel-servicios-list" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Código Servicio</th>
+              <th class="px-4 py-3 font-semibold">Cliente / Contrato</th>
+              <th class="px-4 py-3 font-semibold">Plan</th>
+              <th class="px-4 py-3 font-semibold">Última Actualización</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold text-right">Cambiar Estado</th>
+            </tr>
+          </thead>
+          <tbody id="servicios-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+
+      <div id="subpanel-tickets-list" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Código</th>
+              <th class="px-4 py-3 font-semibold">Cliente</th>
+              <th class="px-4 py-3 font-semibold">Inconveniente Reportado</th>
+              <th class="px-4 py-3 font-semibold">Fecha</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold text-right">Avanzar</th>
+            </tr>
+          </thead>
+          <tbody id="tickets-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-bg fixed inset-0 z-[60] hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl grid md:grid-cols-5 overflow-hidden my-auto">
+      <div class="md:col-span-2 bg-gradient-to-br from-[#0b2447] to-[#1d6fa5] text-white p-7 flex flex-col justify-between gap-6">
+        <div>
+          <div class="w-12 h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center mb-4"><i data-lucide="wifi" class="w-6 h-6 text-sky-200"></i></div>
+          <h1 class="text-xl font-bold leading-tight">ISP Manager</h1>
+          <p class="text-sm text-sky-100 mt-1">Sistema de Gestión de Clientes, Planes y Facturación</p>
+        </div>
+        
+      </div>
+      <div class="md:col-span-3 p-7">
+        <h2 class="text-lg font-bold text-slate-900">Iniciar sesión</h2>
+        <p class="text-sm text-slate-500 mb-4">Ingresa con tu usuario o elige un perfil de demostración.</p>
+        <form id="login-form" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Usuario</label>
+            <input id="login-user" autocomplete="username" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="admin" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Contraseña</label>
+            <input id="login-pass" type="password" autocomplete="current-password" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="••••••••" />
+          </div>
+          <p id="login-error" class="hidden text-xs text-red-600">Usuario o contraseña incorrectos.</p>
+          <button type="submit" class="w-full bg-[#1e3a5f] hover:bg-[#162d4a] text-white text-sm font-semibold py-2.5 rounded-lg transition">Ingresar</button>
+        </form>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mt-5 mb-2">Perfiles de demostración</p>
+        <div id="role-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL OVERLAY -->
+  <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-40">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="modal-title" class="text-base font-bold text-slate-900">Modal</h3>
+        <button id="btn-close-modal" type="button" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="modal-form" class="p-6 space-y-4">
+        <div id="modal-fields" class="space-y-3"></div>
+        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <button id="btn-cancel-modal" type="button" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">Cancelar</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium bg-[#1e3a5f] hover:bg-[#162d4a] text-white rounded-lg transition">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2 bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-lg">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Operación completada</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ug_isp_grupoD_state_v1';
+
+    const DEFAULT_STATE = {
+      planes: [
+        { id: 'PLN-01', nombre: 'Fibra Hogar 100', velocidad: '100 Mbps', precio: 25.00, descripcion: 'Ideal para navegación, teletrabajo y streaming HD.', estado: 'Activo' },
+        { id: 'PLN-02', nombre: 'Fibra Plus 250', velocidad: '250 Mbps', precio: 35.00, descripcion: 'Alta velocidad simétrica para hogares conectados.', estado: 'Activo' },
+        { id: 'PLN-03', nombre: 'Fibra Pro PyME 500', velocidad: '500 Mbps', precio: 58.00, descripcion: 'Plan empresarial con soporte prioritario y IP fija.', estado: 'Activo' }
+      ],
+      clientes: [
+        {
+          id: '0924815201', nombre: 'Carlos Mendoza Vera', direccion: 'Cdla. Alborada 7ma Etapa Mz 714',
+          telefono: '0994128831', correo: 'cmendoza@correo.ec', fechaRegistro: '2026-09-12',
+          contrato: 'CTR-2026-001', fechaInicio: '2026-09-15', planId: 'PLN-02', estadoContrato: 'Activo',
+          servicioId: 'SRV-001', estadoServicio: 'Activo', fechaActualizacion: '2026-11-20'
+        },
+        {
+          id: '0918743310', nombre: 'María Fernanda Paredes', direccion: 'Av. Francisco de Orellana Km 3',
+          telefono: '0987654120', correo: 'mparedes@correo.ec', fechaRegistro: '2026-10-02',
+          contrato: 'CTR-2026-002', fechaInicio: '2026-10-05', planId: 'PLN-03', estadoContrato: 'Activo',
+          servicioId: 'SRV-002', estadoServicio: 'Activo', fechaActualizacion: '2026-11-22'
+        },
+        {
+          id: '0951209844', nombre: 'Luis Eduardo Zambrano', direccion: 'Sauces 4 Mz 281 Villa 14',
+          telefono: '0991204458', correo: 'lzambrano@correo.ec', fechaRegistro: '2026-08-19',
+          contrato: 'CTR-2026-003', fechaInicio: '2026-08-20', planId: 'PLN-01', estadoContrato: 'Suspendido',
+          servicioId: 'SRV-003', estadoServicio: 'Suspendido', fechaActualizacion: '2026-11-18'
+        }
+      ],
+      equipos: [
+        { id: 'EQ-001', tipo: 'ONT Fibra', marcaModelo: 'Huawei HG8145V5', serie: 'HW-9948120A', contrato: 'CTR-2026-001', estado: 'Asignado' },
+        { id: 'EQ-002', tipo: 'Router Dual Band', marcaModelo: 'TP-Link Archer AX23', serie: 'TP-5582910C', contrato: 'CTR-2026-002', estado: 'Asignado' },
+        { id: 'EQ-003', tipo: 'ONT Fibra', marcaModelo: 'ZTE F670L', serie: 'ZT-3310844B', contrato: 'CTR-2026-003', estado: 'Asignado' },
+        { id: 'EQ-004', tipo: 'Router Wi-Fi 6', marcaModelo: 'MikroTik hAP ax2', serie: 'MK-7721004D', contrato: 'Sin asignar', estado: 'Disponible' }
+      ],
+      facturas: [
+        { id: 'FAC-2026-101', clienteId: '0924815201', contrato: 'CTR-2026-001', emision: '2026-11-01', vencimiento: '2026-11-15', valor: 35.00, estado: 'Pagada' },
+        { id: 'FAC-2026-102', clienteId: '0918743310', contrato: 'CTR-2026-002', emision: '2026-11-05', vencimiento: '2026-11-28', valor: 58.00, estado: 'Pendiente' },
+        { id: 'FAC-2026-103', clienteId: '0951209844', contrato: 'CTR-2026-003', emision: '2026-10-20', vencimiento: '2026-11-05', valor: 25.00, estado: 'Vencida' }
+      ],
+      pagos: [
+        { id: 'PAG-2026-051', facturaId: 'FAC-2026-101', clienteId: '0924815201', fecha: '2026-11-10', valor: 35.00, metodo: 'Transferencia' }
+      ],
+      tickets: [
+        { id: 'SOP-001', clienteId: '0918743310', descripcion: 'Intermitencia en la señal Wi-Fi durante horas pico.', fecha: '2026-11-23', estado: 'En proceso' },
+        { id: 'SOP-002', clienteId: '0951209844', descripcion: 'Solicitud de reconexión tras consulta de saldo pendiente.', fecha: '2026-11-24', estado: 'Abierto' }
+      ]
+    };
+
+    let state = loadState();
+    let currentModalHandler = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2800);
+    }
+
+    function badge(status) {
+      const map = {
+        'Activo': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Pagada': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Resuelto': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'Disponible': 'bg-sky-50 text-sky-700 border-sky-200',
+        'Asignado': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'Pendiente': 'bg-amber-50 text-amber-700 border-amber-200',
+        'En proceso': 'bg-amber-50 text-amber-700 border-amber-200',
+        'En mantenimiento': 'bg-amber-50 text-amber-700 border-amber-200',
+        'Suspendido': 'bg-rose-50 text-rose-700 border-rose-200',
+        'Vencida': 'bg-rose-50 text-rose-700 border-rose-200',
+        'Abierto': 'bg-rose-50 text-rose-700 border-rose-200',
+        'Cancelado': 'bg-slate-100 text-slate-600 border-slate-200',
+        'Inactivo': 'bg-slate-100 text-slate-600 border-slate-200'
+      };
+      const cls = map[status] || 'bg-slate-100 text-slate-700 border-slate-200';
+      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${cls}">${status}</span>`;
+    }
+
+    function getPlanName(planId) {
+      const p = state.planes.find(x => x.id === planId);
+      return p ? `${p.nombre} (${p.velocidad})` : planId;
+    }
+
+    function getClientName(clienteId) {
+      const c = state.clientes.find(x => x.id === clienteId);
+      return c ? c.nombre : clienteId;
+    }
+
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    // --- NAVIGATION ---
+    function switchView(viewName) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.view === viewName) {
+          btn.classList.add('tab-active');
+          btn.classList.remove('hover:bg-slate-100');
+        } else {
+          btn.classList.remove('tab-active');
+          btn.classList.add('hover:bg-slate-100');
+        }
+      });
+      renderAll();
+    }
+
+    function bindSubtabs(btnClass, panelPrefix) {
+      document.querySelectorAll('.' + btnClass).forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.' + btnClass).forEach(b => {
+            b.classList.remove('subtab-active');
+            b.classList.add('text-slate-500');
+          });
+          btn.classList.add('subtab-active');
+          btn.classList.remove('text-slate-500');
+          const sub = btn.dataset.subtab;
+          document.querySelectorAll(`[id^="${panelPrefix}"]`).forEach(p => p.classList.add('hidden'));
+          const activePanel = document.getElementById('subpanel-' + sub);
+          if (activePanel) activePanel.classList.remove('hidden');
+        });
+      });
+    }
+
+    // --- RENDER FUNCTIONS ---
+    function renderDashboard() {
+      const activos = state.clientes.filter(c => c.estadoContrato === 'Activo').length;
+      const recaudado = state.pagos.reduce((s, p) => s + Number(p.valor || 0), 0);
+      const pendientes = state.facturas.filter(f => f.estado !== 'Pagada');
+      const montoPendiente = pendientes.reduce((s, f) => s + Number(f.valor || 0), 0);
+      const ticketsAbiertos = state.tickets.filter(t => t.estado !== 'Resuelto').length;
+
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-500">
+            <span>Clientes Activos</span>
+            <i data-lucide="users" class="w-4 h-4 text-sky-600"></i>
+          </div>
+          <p class="text-2xl font-bold text-slate-900 mt-2">${activos} <span class="text-xs font-normal text-slate-400">/ ${state.clientes.length} total</span></p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-500">
+            <span>Recaudación Registrada</span>
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+          <p class="text-2xl font-bold text-emerald-700 mt-2">$${recaudado.toFixed(2)}</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-500">
+            <span>Por Cobrar (${pendientes.length})</span>
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i>
+          </div>
+          <p class="text-2xl font-bold text-amber-700 mt-2">$${montoPendiente.toFixed(2)}</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between text-xs font-medium text-slate-500">
+            <span>Soporte Abierto</span>
+            <i data-lucide="headphones" class="w-4 h-4 text-rose-600"></i>
+          </div>
+          <p class="text-2xl font-bold text-slate-900 mt-2">${ticketsAbiertos} <span class="text-xs font-normal text-slate-400">solicitudes</span></p>
+        </div>
+      `;
+
+      const pendEl = document.getElementById('dash-pending-invoices');
+      if (!pendientes.length) {
+        pendEl.innerHTML = `<p class="p-5 text-slate-400 text-center">No hay facturas pendientes.</p>`;
+      } else {
+        pendEl.innerHTML = pendientes.slice(0, 5).map(f => `
+          <div class="px-5 py-3 flex items-center justify-between gap-2">
+            <div>
+              <p class="font-medium text-slate-800">${getClientName(f.clienteId)}</p>
+              <p class="text-xs text-slate-500">${f.id} · Vence: ${f.vencimiento}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-slate-900">$${Number(f.valor).toFixed(2)}</span>
+              ${badge(f.estado)}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const openTickets = state.tickets.filter(t => t.estado !== 'Resuelto');
+      const tickEl = document.getElementById('dash-open-tickets');
+      if (!openTickets.length) {
+        tickEl.innerHTML = `<p class="p-5 text-slate-400 text-center">Todas las solicitudes están resueltas.</p>`;
+      } else {
+        tickEl.innerHTML = openTickets.slice(0, 5).map(t => `
+          <div class="px-5 py-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-medium text-slate-800 truncate">${getClientName(t.clienteId)} <span class="text-xs text-slate-400">(${t.id})</span></p>
+              <p class="text-xs text-slate-500 truncate">${t.descripcion}</p>
+            </div>
+            ${badge(t.estado)}
+          </div>
+        `).join('');
+      }
+    }
+
+    function renderClientes() {
+      const q = (document.getElementById('search-clients').value || '').toLowerCase().trim();
+      const status = document.getElementById('filter-contract-status').value;
+      const list = state.clientes.filter(c => {
+        const matchQ = !q || c.id.toLowerCase().includes(q) || c.nombre.toLowerCase().includes(q) || c.contrato.toLowerCase().includes(q);
+        const matchS = status === 'ALL' || c.estadoContrato === status;
+        return matchQ && matchS;
+      });
+      const tbody = document.getElementById('clients-tbody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No se encontraron clientes con ese criterio.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(c => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-mono text-xs text-slate-700">${c.id}</td>
+          <td class="px-4 py-3">
+            <p class="font-medium text-slate-900">${c.nombre}</p>
+            <p class="text-xs text-slate-500">${c.telefono} · ${c.correo}</p>
+            <p class="text-xs text-slate-400">${c.direccion}</p>
+          </td>
+          <td class="px-4 py-3">
+            <p class="font-medium text-slate-800">${c.contrato}</p>
+            <p class="text-xs text-slate-500">Inicio: ${c.fechaInicio}</p>
+          </td>
+          <td class="px-4 py-3 text-slate-700">${getPlanName(c.planId)}</td>
+          <td class="px-4 py-3">${badge(c.estadoContrato)}</td>
+          <td class="px-4 py-3 text-right">
+            <button type="button" data-edit-client="${c.id}" class="text-xs font-medium text-sky-700 hover:text-sky-900 px-2.5 py-1 rounded-md hover:bg-sky-50 transition">Editar</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPlanesYEquipos() {
+      const planesEl = document.getElementById('subpanel-planes-list');
+      planesEl.innerHTML = state.planes.map(p => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col justify-between gap-4">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="text-xs font-mono text-slate-400">${p.id}</span>
+                <h3 class="text-base font-bold text-slate-900">${p.nombre}</h3>
+              </div>
+              ${badge(p.estado)}
+            </div>
+            <p class="text-2xl font-bold text-[#1e3a5f] mt-3">$${Number(p.precio).toFixed(2)} <span class="text-xs font-normal text-slate-500">/ mes · ${p.velocidad}</span></p>
+            <p class="text-xs text-slate-600 mt-2">${p.descripcion}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <button type="button" data-toggle-plan="${p.id}" class="text-xs font-medium text-slate-600 hover:text-slate-900 px-2.5 py-1 rounded hover:bg-slate-100">
+              ${p.estado === 'Activo' ? 'Desactivar' : 'Activar'}
+            </button>
+            <button type="button" data-edit-plan="${p.id}" class="text-xs font-medium text-sky-700 hover:text-sky-900 px-2.5 py-1 rounded hover:bg-sky-50">Editar</button>
+          </div>
+        </div>
+      `).join('');
+
+      const eqBody = document.getElementById('equipos-tbody');
+      eqBody.innerHTML = state.equipos.map(e => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-mono text-xs">${e.id}</td>
+          <td class="px-4 py-3">
+            <p class="font-medium text-slate-900">${e.tipo}</p>
+            <p class="text-xs text-slate-500">${e.marcaModelo}</p>
+          </td>
+          <td class="px-4 py-3 font-mono text-xs text-slate-600">${e.serie}</td>
+          <td class="px-4 py-3 text-slate-700">${e.contrato}</td>
+          <td class="px-4 py-3">${badge(e.estado)}</td>
+          <td class="px-4 py-3 text-right">
+            <button type="button" data-edit-equip="${e.id}" class="text-xs font-medium text-sky-700 hover:text-sky-900 px-2.5 py-1 rounded hover:bg-sky-50">Editar</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderFacturacion() {
+      const fStatus = document.getElementById('filter-invoice-status').value;
+      const list = state.facturas.filter(f => fStatus === 'ALL' || f.estado === fStatus);
+      const tbody = document.getElementById('facturas-tbody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No hay facturas en esta categoría.</td></tr>`;
+      } else {
+        tbody.innerHTML = list.map(f => `
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-mono text-xs font-medium">${f.id}</td>
+            <td class="px-4 py-3">
+              <p class="font-medium text-slate-900">${getClientName(f.clienteId)}</p>
+              <p class="text-xs text-slate-500">${f.contrato}</p>
+            </td>
+            <td class="px-4 py-3 text-xs text-slate-600">
+              <p>Emisión: ${f.emision}</p>
+              <p>Vence: ${f.vencimiento}</p>
+            </td>
+            <td class="px-4 py-3 font-semibold text-slate-900">$${Number(f.valor).toFixed(2)}</td>
+            <td class="px-4 py-3">${badge(f.estado)}</td>
+            <td class="px-4 py-3 text-right">
+              ${f.estado !== 'Pagada'
+                ? `<button type="button" data-pay-invoice="${f.id}" class="text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg transition">Registrar Pago</button>`
+                : `<span class="text-xs text-slate-400">Liquidada</span>`}
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      const pBody = document.getElementById('pagos-tbody');
+      if (!state.pagos.length) {
+        pBody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Aún no se registran pagos.</td></tr>`;
+      } else {
+        pBody.innerHTML = state.pagos.map(p => `
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-mono text-xs">${p.id}</td>
+            <td class="px-4 py-3 font-mono text-xs text-slate-600">${p.facturaId}</td>
+            <td class="px-4 py-3 font-medium text-slate-800">${getClientName(p.clienteId)}</td>
+            <td class="px-4 py-3 text-xs text-slate-600">${p.fecha}</td>
+            <td class="px-4 py-3 text-slate-700">${p.metodo}</td>
+            <td class="px-4 py-3 text-right font-semibold text-emerald-700">$${Number(p.valor).toFixed(2)}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderSoporte() {
+      const sBody = document.getElementById('servicios-tbody');
+      sBody.innerHTML = state.clientes.map(c => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-mono text-xs">${c.servicioId}</td>
+          <td class="px-4 py-3">
+            <p class="font-medium text-slate-900">${c.nombre}</p>
+            <p class="text-xs text-slate-500">${c.contrato}</p>
+          </td>
+          <td class="px-4 py-3 text-slate-700">${getPlanName(c.planId)}</td>
+          <td class="px-4 py-3 text-xs text-slate-500">${c.fechaActualizacion}</td>
+          <td class="px-4 py-3">${badge(c.estadoServicio)}</td>
+          <td class="px-4 py-3 text-right">
+            <select data-change-service="${c.id}" class="text-xs border border-slate-300 rounded-md px-2 py-1 bg-white">
+              <option value="Activo" ${c.estadoServicio === 'Activo' ? 'selected' : ''}>Activo</option>
+              <option value="Suspendido" ${c.estadoServicio === 'Suspendido' ? 'selected' : ''}>Suspendido</option>
+              <option value="Pendiente" ${c.estadoServicio === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+
+      const tBody = document.getElementById('tickets-tbody');
+      if (!state.tickets.length) {
+        tBody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No hay solicitudes de soporte registradas.</td></tr>`;
+      } else {
+        tBody.innerHTML = state.tickets.map(t => {
+          const next = t.estado === 'Abierto' ? 'En proceso' : (t.estado === 'En proceso' ? 'Resuelto' : null);
+          return `
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-mono text-xs">${t.id}</td>
+              <td class="px-4 py-3 font-medium text-slate-900">${getClientName(t.clienteId)}</td>
+              <td class="px-4 py-3 text-slate-700 max-w-xs">${t.descripcion}</td>
+              <td class="px-4 py-3 text-xs text-slate-500">${t.fecha}</td>
+              <td class="px-4 py-3">${badge(t.estado)}</td>
+              <td class="px-4 py-3 text-right">
+                ${next
+                  ? `<button type="button" data-advance-ticket="${t.id}" class="text-xs font-medium text-sky-700 hover:bg-sky-50 px-2.5 py-1 rounded-md border border-sky-200 transition">Pasar a ${next}</button>`
+                  : `<span class="text-xs text-slate-400">Cerrado</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderClientes();
+      renderPlanesYEquipos();
+      renderFacturacion();
+      renderSoporte();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // --- MODAL HELPERS ---
+    function openModal(title, fieldsHtml, onSubmit) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-fields').innerHTML = fieldsHtml;
+      currentModalHandler = onSubmit;
+      const bg = document.getElementById('modal-backdrop');
+      bg.classList.remove('hidden');
+      bg.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeModal() {
+      const bg = document.getElementById('modal-backdrop');
+      bg.classList.add('hidden');
+      bg.classList.remove('flex');
+      currentModalHandler = null;
+    }
+
+    function openClientModal(existingId = null) {
+      const c = existingId ? state.clientes.find(x => x.id === existingId) : null;
+      const planOptions = state.planes.map(p =>
+        `<option value="${p.id}" ${c && c.planId === p.id ? 'selected' : ''}>${p.nombre} — $${Number(p.precio).toFixed(2)}</option>`
+      ).join('');
+      const nextNum = String(state.clientes.length + 1).padStart(3, '0');
+      openModal(c ? 'Editar Cliente y Contrato' : 'Registrar Cliente y Contrato', `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Cédula / RUC</label>
+            <input name="id" required value="${c ? c.id : ''}" ${c ? 'readonly class="w-full px-3 py-2 text-sm border border-slate-200 bg-slate-100 rounded-lg"' : 'class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"'} placeholder="09XXXXXXXX" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Código de Contrato</label>
+            <input name="contrato" required value="${c ? c.contrato : 'CTR-2026-' + nextNum}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Nombres y Apellidos</label>
+          <input name="nombre" required value="${c ? c.nombre : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Dirección de Instalación</label>
+          <input name="direccion" required value="${c ? c.direccion : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Teléfono</label>
+            <input name="telefono" required value="${c ? c.telefono : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Correo Electrónico</label>
+            <input name="correo" type="email" required value="${c ? c.correo : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Plan Contratado</label>
+            <select name="planId" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">${planOptions}</select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Estado del Contrato</label>
+            <select name="estadoContrato" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+              <option value="Activo" ${!c || c.estadoContrato === 'Activo' ? 'selected' : ''}>Activo</option>
+              <option value="Suspendido" ${c && c.estadoContrato === 'Suspendido' ? 'selected' : ''}>Suspendido</option>
+              <option value="Cancelado" ${c && c.estadoContrato === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+            </select>
+          </div>
+        </div>
+      `, (fd) => {
+        const record = {
+          id: fd.get('id').trim(),
+          nombre: fd.get('nombre').trim(),
+          direccion: fd.get('direccion').trim(),
+          telefono: fd.get('telefono').trim(),
+          correo: fd.get('correo').trim(),
+          fechaRegistro: c ? c.fechaRegistro : todayISO(),
+          contrato: fd.get('contrato').trim(),
+          fechaInicio: c ? c.fechaInicio : todayISO(),
+          planId: fd.get('planId'),
+          estadoContrato: fd.get('estadoContrato'),
+          servicioId: c ? c.servicioId : 'SRV-' + nextNum,
+          estadoServicio: fd.get('estadoContrato') === 'Activo' ? 'Activo' : 'Suspendido',
+          fechaActualizacion: todayISO()
+        };
+        if (c) {
+          const idx = state.clientes.findIndex(x => x.id === existingId);
+          state.clientes[idx] = record;
+          showToast('Cliente y contrato actualizados.');
+        } else {
+          state.clientes.unshift(record);
+          showToast('Cliente y contrato registrados.');
+        }
+        saveState();
+        renderAll();
+      });
+    }
+
+    function openPlanModal(existingId = null) {
+      const p = existingId ? state.planes.find(x => x.id === existingId) : null;
+      const nextId = 'PLN-' + String(state.planes.length + 1).padStart(2, '0');
+      openModal(p ? 'Editar Plan de Internet' : 'Nuevo Plan de Internet', `
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Código</label>
+            <input name="id" required value="${p ? p.id : nextId}" ${p ? 'readonly class="w-full px-3 py-2 text-sm border border-slate-200 bg-slate-100 rounded-lg"' : 'class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"'} />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Velocidad</label>
+            <input name="velocidad" required value="${p ? p.velocidad : ''}" placeholder="Ej: 150 Mbps" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Nombre del Plan</label>
+            <input name="nombre" required value="${p ? p.nombre : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Precio Mensual ($)</label>
+            <input name="precio" type="number" step="0.01" min="1" required value="${p ? p.precio : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Descripción</label>
+          <textarea name="descripcion" rows="2" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">${p ? p.descripcion : ''}</textarea>
+        </div>
+      `, (fd) => {
+        const rec = {
+          id: fd.get('id').trim(),
+          nombre: fd.get('nombre').trim(),
+          velocidad: fd.get('velocidad').trim(),
+          precio: parseFloat(fd.get('precio')),
+          descripcion: fd.get('descripcion').trim(),
+          estado: p ? p.estado : 'Activo'
+        };
+        if (p) {
+          const i = state.planes.findIndex(x => x.id === existingId);
+          state.planes[i] = rec;
+          showToast('Plan actualizado.');
+        } else {
+          state.planes.push(rec);
+          showToast('Plan creado correctamente.');
+        }
+        saveState();
+        renderAll();
+      });
+    }
+
+    function openEquipModal(existingId = null) {
+      const e = existingId ? state.equipos.find(x => x.id === existingId) : null;
+      const nextId = 'EQ-' + String(state.equipos.length + 1).padStart(3, '0');
+      const ctrOptions = `<option value="Sin asignar">Sin asignar</option>` + state.clientes.map(c =>
+        `<option value="${c.contrato}" ${e && e.contrato === c.contrato ? 'selected' : ''}>${c.contrato} (${c.nombre})</option>`
+      ).join('');
+      openModal(e ? 'Editar Equipo' : 'Registrar Equipo CPE/ONT', `
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Código Equipo</label>
+            <input name="id" required value="${e ? e.id : nextId}" ${e ? 'readonly class="w-full px-3 py-2 text-sm border border-slate-200 bg-slate-100 rounded-lg"' : 'class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"'} />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Tipo</label>
+            <input name="tipo" required value="${e ? e.tipo : 'ONT Fibra'}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Marca y Modelo</label>
+            <input name="marcaModelo" required value="${e ? e.marcaModelo : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Número de Serie</label>
+            <input name="serie" required value="${e ? e.serie : ''}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Contrato Asociado</label>
+            <select name="contrato" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">${ctrOptions}</select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Estado</label>
+            <select name="estado" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+              <option value="Asignado" ${e && e.estado === 'Asignado' ? 'selected' : ''}>Asignado</option>
+              <option value="Disponible" ${!e || e.estado === 'Disponible' ? 'selected' : ''}>Disponible</option>
+              <option value="En mantenimiento" ${e && e.estado === 'En mantenimiento' ? 'selected' : ''}>En mantenimiento</option>
+            </select>
+          </div>
+        </div>
+      `, (fd) => {
+        const rec = {
+          id: fd.get('id').trim(),
+          tipo: fd.get('tipo').trim(),
+          marcaModelo: fd.get('marcaModelo').trim(),
+          serie: fd.get('serie').trim(),
+          contrato: fd.get('contrato'),
+          estado: fd.get('estado')
+        };
+        if (e) {
+          const i = state.equipos.findIndex(x => x.id === existingId);
+          state.equipos[i] = rec;
+          showToast('Equipo actualizado.');
+        } else {
+          state.equipos.push(rec);
+          showToast('Equipo registrado.');
+        }
+        saveState();
+        renderAll();
+      });
+    }
+
+    function openInvoiceModal() {
+      const nextId = 'FAC-2026-' + (101 + state.facturas.length);
+      const clientOpts = state.clientes.map(c => {
+        const p = state.planes.find(x => x.id === c.planId);
+        return `<option value="${c.id}" data-val="${p ? p.precio : 25}">${c.nombre} (${c.contrato}) — $${p ? p.precio.toFixed(2) : '25.00'}</option>`;
+      }).join('');
+      openModal('Emitir Nueva Factura', `
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Código de Factura</label>
+          <input name="id" required value="${nextId}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Cliente y Contrato</label>
+          <select name="clienteId" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">${clientOpts}</select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Fecha de Emisión</label>
+            <input name="emision" type="date" required value="${todayISO()}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Fecha de Vencimiento</label>
+            <input name="vencimiento" type="date" required value="${todayISO()}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Valor Total ($)</label>
+          <input name="valor" type="number" step="0.01" min="1" required value="35.00" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+        </div>
+      `, (fd) => {
+        const cid = fd.get('clienteId');
+        const c = state.clientes.find(x => x.id === cid);
+        state.facturas.unshift({
+          id: fd.get('id').trim(),
+          clienteId: cid,
+          contrato: c ? c.contrato : 'CTR-2026',
+          emision: fd.get('emision'),
+          vencimiento: fd.get('vencimiento'),
+          valor: parseFloat(fd.get('valor')),
+          estado: 'Pendiente'
+        });
+        saveState();
+        renderAll();
+        showToast('Factura emitida correctamente.');
+      });
+    }
+
+    function openPayModal(facturaId) {
+      const f = state.facturas.find(x => x.id === facturaId);
+      if (!f) return;
+      const nextPay = 'PAG-2026-' + String(51 + state.pagos.length).padStart(3, '0');
+      openModal(`Registrar Pago — ${f.id}`, `
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1">
+          <p><span class="font-semibold">Cliente:</span> ${getClientName(f.clienteId)}</p>
+          <p><span class="font-semibold">Contrato:</span> ${f.contrato}</p>
+          <p><span class="font-semibold">Monto a pagar:</span> $${Number(f.valor).toFixed(2)}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Código de Pago</label>
+            <input name="id" required value="${nextPay}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Fecha de Pago</label>
+            <input name="fecha" type="date" required value="${todayISO()}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Método de Pago</label>
+          <select name="metodo" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+            <option value="Transferencia">Transferencia bancaria</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta de crédito/débito</option>
+            <option value="Depósito">Depósito bancario</option>
+          </select>
+        </div>
+      `, (fd) => {
+        f.estado = 'Pagada';
+        state.pagos.unshift({
+          id: fd.get('id').trim(),
+          facturaId: f.id,
+          clienteId: f.clienteId,
+          fecha: fd.get('fecha'),
+          valor: f.valor,
+          metodo: fd.get('metodo')
+        });
+        saveState();
+        renderAll();
+        showToast(`Pago ${fd.get('id')} registrado y factura liquidada.`);
+      });
+    }
+
+    function openTicketModal() {
+      const nextId = 'SOP-' + String(state.tickets.length + 1).padStart(3, '0');
+      const clientOpts = state.clientes.map(c => `<option value="${c.id}">${c.nombre} (${c.contrato})</option>`).join('');
+      openModal('Nueva Solicitud de Soporte Técnico', `
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Código</label>
+            <input name="id" required value="${nextId}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Fecha</label>
+            <input name="fecha" type="date" required value="${todayISO()}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Cliente</label>
+          <select name="clienteId" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">${clientOpts}</select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Descripción del inconveniente</label>
+          <textarea name="descripcion" rows="3" required placeholder="Describe el problema reportado por el cliente..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"></textarea>
+        </div>
+      `, (fd) => {
+        state.tickets.unshift({
+          id: fd.get('id').trim(),
+          clienteId: fd.get('clienteId'),
+          descripcion: fd.get('descripcion').trim(),
+          fecha: fd.get('fecha'),
+          estado: 'Abierto'
+        });
+        saveState();
+        renderAll();
+        showToast('Solicitud de soporte registrada.');
+      });
+    }
+
+    // --- EVENT LISTENERS ---
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
+    document.querySelectorAll('.jump-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.jump));
+    });
+
+    bindSubtabs('planes-subtab', 'subpanel-planes-list');
+    // Also handle planes/equipos toggling cleanly
+    document.querySelectorAll('.planes-subtab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('subpanel-planes-list').classList.toggle('hidden', btn.dataset.subtab !== 'planes-list');
+        document.getElementById('subpanel-equipos-list').classList.toggle('hidden', btn.dataset.subtab !== 'equipos-list');
+      });
+    });
+    document.querySelectorAll('.fact-subtab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.fact-subtab').forEach(b => { b.classList.remove('subtab-active'); b.classList.add('text-slate-500'); });
+        btn.classList.add('subtab-active'); btn.classList.remove('text-slate-500');
+        document.getElementById('subpanel-facturas-list').classList.toggle('hidden', btn.dataset.subtab !== 'facturas-list');
+        document.getElementById('subpanel-pagos-list').classList.toggle('hidden', btn.dataset.subtab !== 'pagos-list');
+      });
+    });
+    document.querySelectorAll('.soporte-subtab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.soporte-subtab').forEach(b => { b.classList.remove('subtab-active'); b.classList.add('text-slate-500'); });
+        btn.classList.add('subtab-active'); btn.classList.remove('text-slate-500');
+        document.getElementById('subpanel-servicios-list').classList.toggle('hidden', btn.dataset.subtab !== 'servicios-list');
+        document.getElementById('subpanel-tickets-list').classList.toggle('hidden', btn.dataset.subtab !== 'tickets-list');
+      });
+    });
+
+    document.getElementById('quick-add-client').addEventListener('click', () => openClientModal());
+    document.getElementById('btn-open-client-modal').addEventListener('click', () => openClientModal());
+    document.getElementById('btn-open-plan-modal').addEventListener('click', () => openPlanModal());
+    document.getElementById('btn-open-equip-modal').addEventListener('click', () => openEquipModal());
+    document.getElementById('quick-add-invoice').addEventListener('click', () => openInvoiceModal());
+    document.getElementById('btn-open-invoice-modal').addEventListener('click', () => openInvoiceModal());
+    document.getElementById('btn-open-ticket-modal').addEventListener('click', () => openTicketModal());
+    document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+    document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+
+    document.getElementById('modal-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (currentModalHandler) {
+        currentModalHandler(new FormData(e.target));
+        closeModal();
+      }
+    });
+
+    document.getElementById('search-clients').addEventListener('input', renderClientes);
+    document.getElementById('filter-contract-status').addEventListener('change', renderClientes);
+    document.getElementById('filter-invoice-status').addEventListener('change', renderFacturacion);
+
+    document.getElementById('btn-reset-demo').addEventListener('click', () => {
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      saveState();
+      renderAll();
+      showToast('Datos de demostración restaurados.');
+    });
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sistema_isp_datos.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Datos exportados en formato JSON.');
+    });
+
+    // Event delegation for dynamic table/card actions
+    document.addEventListener('click', (e) => {
+      const editClient = e.target.closest('[data-edit-client]');
+      if (editClient) return openClientModal(editClient.dataset.editClient);
+
+      const editPlan = e.target.closest('[data-edit-plan]');
+      if (editPlan) return openPlanModal(editPlan.dataset.editPlan);
+
+      const togglePlan = e.target.closest('[data-toggle-plan]');
+      if (togglePlan) {
+        const p = state.planes.find(x => x.id === togglePlan.dataset.togglePlan);
+        if (p) {
+          p.estado = p.estado === 'Activo' ? 'Inactivo' : 'Activo';
+          saveState(); renderAll(); showToast(`Plan ${p.nombre} marcado como ${p.estado}.`);
+        }
+        return;
+      }
+
+      const editEquip = e.target.closest('[data-edit-equip]');
+      if (editEquip) return openEquipModal(editEquip.dataset.editEquip);
+
+      const payInv = e.target.closest('[data-pay-invoice]');
+      if (payInv) return openPayModal(payInv.dataset.payInvoice);
+
+      const advTicket = e.target.closest('[data-advance-ticket]');
+      if (advTicket) {
+        const t = state.tickets.find(x => x.id === advTicket.dataset.advanceTicket);
+        if (t) {
+          t.estado = t.estado === 'Abierto' ? 'En proceso' : 'Resuelto';
+          saveState(); renderAll(); showToast(`Ticket ${t.id} actualizado a ${t.estado}.`);
+        }
+      }
+    });
+
+    document.addEventListener('change', (e) => {
+      const srv = e.target.closest('[data-change-service]');
+      if (srv) {
+        const c = state.clientes.find(x => x.id === srv.dataset.changeService);
+        if (c) {
+          c.estadoServicio = srv.value;
+          c.estadoContrato = srv.value === 'Activo' ? 'Activo' : 'Suspendido';
+          c.fechaActualizacion = todayISO();
+          saveState(); renderAll(); showToast(`Estado de servicio de ${c.nombre} actualizado a ${srv.value}.`);
+        }
+      }
+    });
+
+
+    // =====================================================
+    //  CONFIGURACIÓN DE CONTACTO (cámbialo por los datos reales)
+    // =====================================================
+    const CONTACTO = {
+      telefonoVisible: '0978834917 (+593 97 883 4917)',
+      whatsapp: '593978834917',            // código de país + número, sin + ni espacios
+      correo: 'belinda.tenegusnaytib@ug.edu.ec',
+      horario: 'Lun - Sáb · 08:00 a 20:00',
+      mensaje: 'Hola, necesito soporte técnico con mi servicio de internet.'
+    };
+
+    // =====================================================
+    //  USUARIOS Y ROLES (demo en el navegador)
+    // =====================================================
+    const USUARIOS = [
+      { usuario: 'admin',      clave: 'admin123',      nombre: 'Administrador del Sistema', rol: 'Administrador', icono: 'shield-check',
+        vistas: ['dashboard','clientes','planes','facturacion','soporte'], edita: ['clientes','planes','facturacion','soporte'] },
+      { usuario: 'gerente',    clave: 'gerente123',    nombre: 'Gerente General',           rol: 'Gerente',       icono: 'briefcase',
+        vistas: ['dashboard','clientes','planes','facturacion','soporte'], edita: [] },
+      { usuario: 'secretario', clave: 'secretario123', nombre: 'Secretaría',                rol: 'Secretario',    icono: 'clipboard-list',
+        vistas: ['dashboard','clientes','soporte'], edita: ['clientes','soporte'] },
+      { usuario: 'cajero',     clave: 'cajero123',     nombre: 'Caja y Cobranza',           rol: 'Cajero',        icono: 'wallet',
+        vistas: ['dashboard','facturacion'], edita: ['facturacion'] },
+      { usuario: 'tecnico',    clave: 'tecnico123',    nombre: 'Soporte Técnico',           rol: 'Técnico',       icono: 'wrench',
+        vistas: ['dashboard','planes','soporte'], edita: ['planes','soporte'] }
+    ];
+    const SESSION_KEY = 'ug_isp_grupoD_session_v1';
+    let currentUser = null;
+
+    const EDIT_TARGETS = {
+      clientes:    '#btn-open-client-modal, #quick-add-client, [data-edit-client]',
+      planes:      '#btn-open-plan-modal, #btn-open-equip-modal, [data-edit-plan], [data-toggle-plan], [data-edit-equip]',
+      facturacion: '#btn-open-invoice-modal, #quick-add-invoice, [data-pay-invoice]',
+      soporte:     '#btn-open-ticket-modal, [data-advance-ticket], [data-change-service]'
+    };
+
+    function can(modulo) { return !!currentUser && currentUser.edita.includes(modulo); }
+
+    function applyPermissions() {
+      if (!currentUser) return;
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.toggle('hidden', !currentUser.vistas.includes(b.dataset.view));
+      });
+      Object.entries(EDIT_TARGETS).forEach(([mod, sel]) => {
+        const allowed = can(mod);
+        document.querySelectorAll(sel).forEach(el => {
+          if (el.tagName === 'SELECT') { el.disabled = !allowed; el.classList.toggle('opacity-60', !allowed); }
+          else el.classList.toggle('hidden', !allowed);
+        });
+      });
+      document.getElementById('btn-reset-demo').classList.toggle('hidden', currentUser.rol !== 'Administrador');
+      document.querySelectorAll('.jump-btn').forEach(b => {
+        b.classList.toggle('hidden', !currentUser.vistas.includes(b.dataset.jump));
+      });
+    }
+
+    function startSession(u) {
+      currentUser = u;
+      try { sessionStorage.setItem(SESSION_KEY, u.usuario); } catch (e) {}
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('flex');
+      document.getElementById('user-name').textContent = u.nombre;
+      document.getElementById('user-role').textContent = u.rol;
+      switchView('dashboard');
+      showToast(`Bienvenido/a, ${u.nombre} (${u.rol}).`);
+    }
+
+    function showLogin() {
+      currentUser = null;
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+      const s = document.getElementById('login-screen');
+      s.classList.remove('hidden'); s.classList.add('flex');
+      document.getElementById('login-form').reset();
+      document.getElementById('login-error').classList.add('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function setupLogin() {
+      document.getElementById('role-cards').innerHTML = USUARIOS.map(u => `
+        <button type="button" data-demo-user="${u.usuario}" class="role-card flex items-center gap-2.5 text-left border border-slate-200 rounded-xl px-3 py-2">
+          <span class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0"><i data-lucide="${u.icono}" class="w-4 h-4"></i></span>
+          <span class="min-w-0">
+            <span class="block text-sm font-semibold text-slate-800">${u.rol}</span>
+            <span class="block text-[11px] text-slate-400 truncate">${u.usuario} / ${u.clave}</span>
+          </span>
+        </button>`).join('');
+
+      document.getElementById('role-cards').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-demo-user]');
+        if (!b) return;
+        const u = USUARIOS.find(x => x.usuario === b.dataset.demoUser);
+        document.getElementById('login-user').value = u.usuario;
+        document.getElementById('login-pass').value = u.clave;
+      });
+
+      document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value.trim().toLowerCase();
+        const pass = document.getElementById('login-pass').value;
+        const u = USUARIOS.find(x => x.usuario === user && x.clave === pass);
+        if (!u) { document.getElementById('login-error').classList.remove('hidden'); return; }
+        startSession(u);
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', showLogin);
+
+      let saved = null;
+      try { saved = sessionStorage.getItem(SESSION_KEY); } catch (e) {}
+      const u = USUARIOS.find(x => x.usuario === saved);
+      if (u) startSession(u); else showLogin();
+    }
+
+    // El renderAll original ahora también aplica permisos por rol
+    const _renderAllBase = renderAll;
+    renderAll = function () { _renderAllBase(); applyPermissions(); };
+
+    // Evita entrar a vistas no permitidas
+    const _switchViewBase = switchView;
+    switchView = function (viewName) {
+      if (currentUser && !currentUser.vistas.includes(viewName)) viewName = 'dashboard';
+      _switchViewBase(viewName);
+    };
+
+    // =====================================================
+    //  CONTACTO + QR A WHATSAPP
+    // =====================================================
+    function setupContacto() {
+      const url = `https://wa.me/${CONTACTO.whatsapp}?text=${encodeURIComponent(CONTACTO.mensaje)}`;
+      document.getElementById('contact-phone').textContent = CONTACTO.telefonoVisible;
+      document.getElementById('contact-mail').textContent = CONTACTO.correo;
+      document.getElementById('contact-hours').textContent = CONTACTO.horario;
+      document.getElementById('btn-whatsapp').href = url;
+      const box = document.getElementById('qr-whatsapp');
+      box.innerHTML = '';
+      if (window.QRCode) {
+        new QRCode(box, { text: url, width: 132, height: 132, colorDark: '#0b2447', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      } else {
+        box.textContent = 'No se pudo cargar el generador de QR (revisa tu conexión).';
+      }
+    }
+
+    // =====================================================
+    //  EXPORTAR PDF
+    // =====================================================
+    function exportPDF() {
+      if (!(window.jspdf && window.jspdf.jsPDF)) { showToast('No se pudo cargar la librería de PDF. Revisa tu conexión.'); return; }
+      const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+      if (typeof doc.autoTable !== 'function') { showToast('No se pudo cargar el plugin de tablas PDF.'); return; }
+
+      const W = doc.internal.pageSize.getWidth();
+      const fecha = new Date().toLocaleString('es-EC');
+      const money = v => '$' + Number(v).toFixed(2);
+
+      // Portada / encabezado
+      doc.setFillColor(30, 58, 95); doc.rect(0, 0, W, 78, 'F');
+      doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+      doc.text('ISP Manager', 40, 36);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      doc.text('Sistema de Gestión de Clientes, Planes y Facturación', 40, 54);
+      doc.text(`Generado: ${fecha}` + (currentUser ? `  ·  Usuario: ${currentUser.nombre} (${currentUser.rol})` : ''), 40, 68);
+
+      // Resumen
+      const activos = state.clientes.filter(c => c.estadoServicio === 'Activo').length;
+      const recaudado = state.pagos.reduce((s, p) => s + Number(p.valor), 0);
+      const porCobrar = state.facturas.filter(f => f.estado !== 'Pagada').reduce((s, f) => s + Number(f.valor), 0);
+      const ticketsAbiertos = state.tickets.filter(t => t.estado !== 'Resuelto').length;
+      let y = 100;
+      doc.setTextColor(30, 58, 95); doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+      doc.text('Resumen general', 40, y);
+      doc.autoTable({
+        startY: y + 8, theme: 'grid',
+        head: [['Clientes', 'Servicios activos', 'Recaudado', 'Por cobrar', 'Soporte abierto']],
+        body: [[state.clientes.length, activos, money(recaudado), money(porCobrar), ticketsAbiertos]],
+        headStyles: { fillColor: [30, 58, 95] }, styles: { fontSize: 9, halign: 'center' }, margin: { left: 40, right: 40 }
+      });
+
+      const seccion = (titulo, head, body) => {
+        let sy = doc.lastAutoTable.finalY + 24;
+        if (sy > doc.internal.pageSize.getHeight() - 120) { doc.addPage(); sy = 50; }
+        doc.setTextColor(30, 58, 95); doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+        doc.text(titulo, 40, sy);
+        doc.autoTable({
+          startY: sy + 8, head: [head],
+          body: body.length ? body : [[{ content: 'Sin registros', colSpan: head.length, styles: { halign: 'center', textColor: 150 } }]],
+          headStyles: { fillColor: [37, 99, 168] }, alternateRowStyles: { fillColor: [241, 247, 255] },
+          styles: { fontSize: 8, cellPadding: 4 }, margin: { left: 40, right: 40 }
+        });
+      };
+
+      seccion('1. Clientes y contratos',
+        ['Identificación', 'Nombre', 'Teléfono', 'Contrato', 'Plan', 'Estado'],
+        state.clientes.map(c => [c.id, c.nombre, c.telefono, c.contrato, getPlanName(c.planId), c.estadoContrato]));
+      seccion('2. Planes de internet',
+        ['Código', 'Nombre', 'Velocidad', 'Precio mensual', 'Estado'],
+        state.planes.map(p => [p.id, p.nombre, p.velocidad, money(p.precio), p.estado]));
+      seccion('3. Equipos',
+        ['Código', 'Tipo', 'Marca / modelo', 'Serie', 'Contrato', 'Estado'],
+        state.equipos.map(e => [e.id, e.tipo, e.marcaModelo, e.serie, e.contrato, e.estado]));
+      seccion('4. Facturas',
+        ['Código', 'Cliente', 'Contrato', 'Emisión', 'Vencimiento', 'Valor', 'Estado'],
+        state.facturas.map(f => [f.id, getClientName(f.clienteId), f.contrato, f.emision, f.vencimiento, money(f.valor), f.estado]));
+      seccion('5. Pagos',
+        ['Código', 'Factura', 'Cliente', 'Fecha', 'Valor', 'Método'],
+        state.pagos.map(p => [p.id, p.facturaId, getClientName(p.clienteId), p.fecha, money(p.valor), p.metodo]));
+      seccion('6. Estado de servicios',
+        ['Servicio', 'Cliente', 'Contrato', 'Estado', 'Actualización'],
+        state.clientes.map(c => [c.servicioId, c.nombre, c.contrato, c.estadoServicio, c.fechaActualizacion]));
+      seccion('7. Solicitudes de soporte',
+        ['Código', 'Cliente', 'Descripción', 'Fecha', 'Estado'],
+        state.tickets.map(t => [t.id, getClientName(t.clienteId), t.descripcion, t.fecha, t.estado]));
+
+      // Pie con contacto y numeración
+      const pages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pages; i++) {
+        doc.setPage(i);
+        const H = doc.internal.pageSize.getHeight();
+        doc.setFontSize(8); doc.setTextColor(120); doc.setFont('helvetica', 'normal');
+        doc.text(`Servicio al cliente: ${CONTACTO.telefonoVisible} · ${CONTACTO.correo}`, 40, H - 24);
+        doc.text(`Página ${i} de ${pages}`, W - 40, H - 24, { align: 'right' });
+      }
+      const pdfFilename = 'sistema_isp_reporte.pdf';
+      doc.save(pdfFilename);
+      showToast('Reporte exportado en formato PDF.');
+      openSendEmailModal(pdfFilename);
+    }
+
+    function openSendEmailModal(pdfFilename) {
+      const asuntoDefault = `Reporte ISP Manager (${todayISO()})`;
+      const cuerpoDefault = `Hola,\n\nTe comparto el reporte PDF recién descargado (${pdfFilename}) del Sistema de Gestión de Clientes, Planes y Facturación para ISP.\n\nPor favor revisa el archivo adjunto.\n\nSaludos,\n${currentUser ? currentUser.nombre : 'ISP Manager'}`;
+      openModal('Enviar reporte PDF por correo', `
+        <div class="p-3 bg-sky-50 border border-sky-200 rounded-lg text-xs text-sky-900">
+          El archivo <strong>${pdfFilename}</strong> ya se descargó en tu equipo. Indica el destinatario para abrir tu correo listo para adjuntarlo y enviarlo.
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Correo del destinatario</label>
+          <input name="to" type="email" required value="${CONTACTO.correo}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" placeholder="destinatario@correo.com" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Asunto</label>
+          <input name="subject" required value="${asuntoDefault}" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Mensaje</label>
+          <textarea name="body" rows="4" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">${cuerpoDefault}</textarea>
+        </div>
+      `, (fd) => {
+        const to = encodeURIComponent(fd.get('to').trim());
+        const subject = encodeURIComponent(fd.get('subject').trim());
+        const body = encodeURIComponent(fd.get('body').trim());
+        const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
+        const a = document.createElement('a');
+        a.href = mailtoUrl;
+        a.click();
+        showToast(`Abriendo correo para ${fd.get('to').trim()}...`);
+      });
+    }
+    document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
+
+    setupContacto();
+    setupLogin();
+    renderAll();
+  </script>
+</body>
+</html>
