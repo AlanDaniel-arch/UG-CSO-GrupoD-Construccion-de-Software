@@ -10,3 +10,4 @@ Cada bitácora contiene: tema, fecha, hora de inicio y fin, lugar (Zoom/Meet), p
 |---|---|---|---|---|
 | 01 | | Organización del grupo y elección del proyecto | U1 · S2 | |
 | 02 | 25/11/2026 | Coordinación técnica, arquitectura inicial y entrega del Avance 1 (ISP) | U1 · S3 | `BIT_02_GRUPO-D_25112026.pdf` |
+| 06 | 25/11/2026 | Coordinación de la entrega parcial con plan de pruebas y tolerancia a fallos | U1 · S6 | `BIT_06_GRUPO-D_25112026.docx` y `BIT_06_GRUPO-D_25112026.pdf` |
