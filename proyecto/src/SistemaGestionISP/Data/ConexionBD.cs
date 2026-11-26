@@ -3,19 +3,17 @@ using MySql.Data.MySqlClient;
 
 namespace SistemaGestionISP.Data
 {
-    /// <summary>
-    /// Administra la conexión hacia el servidor de base de datos MySQL.
-    /// </summary>
+    /// <summary>Administra la conexión hacia la base de datos MySQL <c>isp_gestion_db</c>.</summary>
     public class ConexionBD : IConexionBD
     {
         /// <summary>
-        /// Nombre de la variable de entorno que, si existe, reemplaza la cadena de
-        /// conexión por defecto. Así la contraseña real no queda escrita en el código.
+        /// Variable de entorno que, si existe, reemplaza la cadena de conexión por defecto.
+        /// Así la contraseña real no queda escrita en el código.
         /// </summary>
         public const string VariableEntorno = "ISP_DB_CONNECTION";
 
         // Valor SOLO para desarrollo local; en otros entornos definir ISP_DB_CONNECTION.
-        private const string CadenaPorDefecto = "Server=localhost;Database=isp_gestion;Uid=root;Pwd=root;";
+        private const string CadenaPorDefecto = "Server=localhost;Database=isp_gestion_db;Uid=root;Pwd=root;";
 
         private readonly string cadenaConexion;
 
@@ -31,9 +29,7 @@ namespace SistemaGestionISP.Data
             this.cadenaConexion = string.IsNullOrWhiteSpace(cadenaConexion) ? CadenaPorDefecto : cadenaConexion;
         }
 
-        /// <summary>
-        /// Crea y retorna una nueva instancia de conexión MySQL.
-        /// </summary>
+        /// <summary>Crea y retorna una nueva instancia de conexión MySQL (sin abrir).</summary>
         public MySqlConnection ObtenerConexion()
         {
             return new MySqlConnection(cadenaConexion);

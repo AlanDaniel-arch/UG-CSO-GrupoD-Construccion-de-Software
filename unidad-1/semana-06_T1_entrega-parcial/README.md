@@ -19,11 +19,18 @@
 - [ ] Instrucciones detalladas para abrir el proyecto en el IDE elegido (sección «Cómo abrir el proyecto» del [README principal](../../README.md#cómo-abrir-y-ejecutar-el-proyecto))
 - [ ] Bitácora de actividades del grupo indicando los módulos/componentes implementados y su **porcentaje de avance**, en [`/bitacoras`](../../bitacoras)
 
+### Ya disponible en el repositorio (punto de partida)
+
+- Diseño de la tolerancia a fallos: documento maestro V2 §9 ([PDF](../semana-04_T1_avance-2/Diseno_Detallado_GrupoD_v2.pdf)): mecanismos del prototipo, jerarquía de excepciones propias (usuario inexistente, contraseña incorrecta, cuenta bloqueada) y matriz de fallos.
+- **Cambio CC-01 pendiente** (bloqueo tras 3 intentos): [`proyecto/database/cambios/CC-01_bloqueo_cuentas.sql`](../../proyecto/database/cambios/CC-01_bloqueo_cuentas.sql).
+- Hay una rama con trabajo previo de excepciones y reintentos: `jefferson/u1-s6-tolerancia-fallos`. **Está basada en la estructura antigua** (consola con base `isp_gestion`): hay que rehacerla sobre `Repositories/` y el esquema `isp_gestion_db` antes de unirla. Ver [`NOTAS_PARA_EL_EQUIPO.md`](../../NOTAS_PARA_EL_EQUIPO.md).
+- Los catch vacíos del prototipo (V2 §7.3) deben corregirse como parte de esta entrega.
+
 ### Responsables
 
 | Parte | Integrante(s) | Estado |
 |---|---|---|
-| | | |
+| Plan de pruebas final, tolerancia a fallos y artículo | Mina Guacho Andrea Rosario · Olvera Suarez Jefferson Lenin | ⏳ En preparación (rama de Jefferson por adaptar) |
 
 ### Archivos de esta entrega
 

@@ -1,42 +1,38 @@
 # U1 · Semana 3 · Tarea 1 (GRUPAL)
 ## Desarrollo de proyecto: entrega del avance 1 del proyecto grupal
 
-| Detalle | Valor |
-| :--- | :--- |
+| | |
+|---|---|
 | Cierre en el aula virtual | jueves 17 de diciembre de 2026, 05:09 |
-| Tiempo | 7 horas de integración |
-| Estado | ✅ Completado (en revisión PR #1) |
-| Tag de la entrega | se crea al cerrar la entrega |
+| Tiempo estimado | 7 horas por integrante |
+| Estado | ✅ Completado |
+| Tag de la entrega | _se crea al cerrar la entrega_ (propuesto: `U1-S03-avance-1`) |
+
+**Qué es el Avance 1 según el documento maestro V2 (§12.2):** el **prototipo funcional** del sistema: los cuatro módulos y el control de acceso por roles, ya probado (16 pruebas unitarias y 27 funcionales). Está en [`/proyecto/src/prototipo-web`](../../proyecto/src/prototipo-web).
 
 ### Qué pide la actividad (lista de control)
 
-- [x] Avance del Artículo de investigación -> `Articulo_Avance1_GrupoD.docx` + `.pdf`
-- [x] Resumen de lo implementado en este avance y lo pendiente por hacer
-- [x] Código fuente comentado, en `/proyecto/src`
-- [x] Instrucciones para abrir y ejecutar el proyecto en el IDE (sección «Cómo abrir y ejecutar el proyecto» del `README.md` principal)
-- [x] Bitácora de actividades con los módulos/componentes implementados y su porcentaje de avance, en `/bitacoras`
+- [x] Avance del **artículo** de investigación → [`Articulo_Avance1_GrupoD.docx`](Articulo_Avance1_GrupoD.docx) + [`.pdf`](Articulo_Avance1_GrupoD.pdf)
+- [x] Código fuente **comentado**, en [`/proyecto/src`](../../proyecto/src) (prototipo web)
+- [x] Instrucciones detalladas para abrir el proyecto en el IDE → [README principal](../../README.md#cómo-abrir-y-ejecutar-el-proyecto)
+- [x] Bitácora con los módulos implementados y su **porcentaje de avance** → [`BIT_02_GRUPO-D_25112026`](../../bitacoras/BIT_02_GRUPO-D_25112026.pdf) *(ver la nota de corrección más abajo)*
 
 ### Responsables
 
 | Parte | Integrante(s) | Estado |
-| :--- | :--- | :--- |
-| Código fuente inicial, BD, Artículo y Bitácora | Castillo Torres Aaron Andrés (`@aa1218-a`) | Completado |
+|---|---|---|
+| Avance 1 e integración del repositorio | Castillo Torres Aaron Andrés (`@aa1218-a`) | Completado |
+| Prototipo web: separación en `app.js`, `auth.js` y `forms.js`, pruebas unitarias y funcionales | Monge Dorado Esther Betzabeth (`@esthermonge1515-beep`) — PR #2, #3 y #4 | Completado |
 
-## Resumen de lo implementado en este avance (U1 - S3)
-- Base de datos relacional (`database/isp_gestion.sql`): Creación de las 5 tablas del sistema ISP (`clientes`, `planes_internet`, `contratos`, `facturas`, `tickets_soporte`) junto con datos semilla iniciales de planes comerciales.
-- Estructura modular en C# (`/proyecto/src/SistemaGestionISP`): Implementación de los componentes `Models`, `Data`, `Services` (capa de servicios con acceso a datos) y `Program.cs` debidamente comentados.
-- Funcionalidades operativas por módulo:
-  - Módulo 1 – Gestión de Clientes y Contratos (30 %): Tabla `clientes`, entidad `Cliente` y CRUD de registro y listado operativos (faltan entidad/CRUD de Contrato y **actualización de clientes).
-  - Módulo 2 – Gestión de Planes y Equipos (25 %): Tablas `planes_internet` y `contratos`, datos semilla y consulta de catálogo operativos (falta gestión de Equipos).
-  - Módulo 3 – Facturación y Registro de Pagos (15 %): Tabla `facturas` y modelo `Factura` definidos.
-  - Módulo 4 – Control de Estado de Servicio y Soporte Básico (40 %): Tabla `tickets_soporte` creada y actualización de estado de servicio (`Activo`, `Suspendido`, `Cancelado`) operativa.
-- Documentación: Primer avance del artículo técnico (`Articulo_Avance1_GrupoD.docx` y `.pdf`), bitácora de reunión (`BIT_02_GRUPO-D_25112026.docx` y `.pdf`) y guía de ejecución en el `README.md` principal.
+### Historia y nota de corrección (25/11/2026)
 
-## Pendiente para el siguiente avance (U1 - S4)
-- Completar las entidades y operaciones CRUD pendientes de **Contrato**, **Equipo** y **actualización de clientes**.
-- Implementar el flujo transaccional de emisión de facturas y registro de pagos (Módulo 3) y la gestión de tickets de soporte (Módulo 4).
-- Ejecutar análisis de *Code Smells*, refactorización aplicando principios SOLID y manejo robusto de excepciones.
+La primera versión de esta entrega describía una **aplicación de consola en C# con una base `isp_gestion` de 5 tablas** (porcentajes 30/25/15/40 %). Al publicarse el documento maestro V2, el grupo adoptó una **única base de datos de 10 tablas** y definió el prototipo web como Avance 1. Por eso:
+
+- El artículo del Avance 1 se **reescribió** para alinearse con el V2 (el original sigue en el historial de Git).
+- El código C# de Aaron **no se perdió**: se adaptó al esquema del V2 y es hoy la base de la implementación objetivo ([`/proyecto/src/SistemaGestionISP`](../../proyecto/src/SistemaGestionISP)).
+- La bitácora `BIT_02` **no se modificó** (es el acta de lo hablado ese día). Sus porcentajes quedan reemplazados por los del V2 (Tabla 32), recogidos en [`BIT_03`](../../bitacoras/BIT_03_GRUPO-D_25112026.pdf).
 
 ### Archivos de esta entrega
 
-_Se listan aquí con enlace cuando se suban._
+- [`Articulo_Avance1_GrupoD.docx`](Articulo_Avance1_GrupoD.docx) · [`.pdf`](Articulo_Avance1_GrupoD.pdf)
+- Código: [`/proyecto/src/prototipo-web`](../../proyecto/src/prototipo-web) · Pruebas: [`/proyecto/tests`](../../proyecto/tests)

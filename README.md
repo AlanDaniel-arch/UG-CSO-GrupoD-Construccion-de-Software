@@ -4,8 +4,11 @@
 Asignatura: Construcción de Software (611) · Paralelo SOF-S-NO-6-7 (Virtual) · Ciclo II 2026-2027
 Docente: Ph.D. Franklin Ricardo Parrales Bravo
 
-> **Proyecto:** Sistema de Gestión de Clientes, Planes y Facturación para un ISP (proveedor de Internet)
-> Centraliza el registro de clientes y contratos, el catálogo de planes y equipos, la facturación con registro de pagos y el control del estado del servicio con soporte básico, para el personal administrativo y técnico de un proveedor de Internet.
+> **Proyecto:** ISP Manager — Sistema de Gestión de Clientes, Planes y Facturación para un ISP (proveedor de Internet)
+> Centraliza clientes y contratos, planes y equipos, facturación con registro de pagos, y estado del servicio con soporte básico, con control de acceso por roles.
+
+> 📘 **Documento maestro (versión 2.0, 25/11/2026):** alcance, requerimientos, diseño detallado, calidad, pruebas, tolerancia a fallos, mantenimiento y trazabilidad con la asignatura → [`Diseno_Detallado_GrupoD_v2.pdf`](unidad-1/semana-04_T1_avance-2/Diseno_Detallado_GrupoD_v2.pdf) ([.docx](unidad-1/semana-04_T1_avance-2/Diseno_Detallado_GrupoD_v2.docx)). **Todo lo que hay en este repositorio se alinea con ese documento.**
+> 👋 **¿Es tu primera vez aquí?** Lee primero [`NOTAS_PARA_EL_EQUIPO.md`](NOTAS_PARA_EL_EQUIPO.md).
 
 Este es el repositorio único del Grupo D. Su enlace es el que se entrega en **todas** las tareas grupales del aula virtual. Cada actividad tiene su propia carpeta, ordenada por **unidad → semana → actividad**, con la lista de lo que pide el docente y los archivos entregados.
 
@@ -17,8 +20,8 @@ Este es el repositorio único del Grupo D. Su enlace es el que se entrega en **t
 
 | Semana | Actividad | Carpeta | Estado |
 |:---:|---|---|:---:|
-| 2 | Tarea 2 · Alcance del proyecto grupal (Diseño Detallado corregido, alcance, requerimientos, tecnologías) | [abrir](unidad-1/semana-02_T2_alcance-del-proyecto) | ⏳ |
-| 3 | Tarea 1 · Avance 1 (código comentado, IDE, avance del artículo) | [abrir](unidad-1/semana-03_T1_avance-1) | ⏳ |
+| 2 | Tarea 2 · Alcance del proyecto grupal (Diseño Detallado corregido, alcance, requerimientos, tecnologías) | [abrir](unidad-1/semana-02_T2_alcance-del-proyecto) | 🔄 |
+| 3 | Tarea 1 · Avance 1 (prototipo funcional, código comentado, IDE, avance del artículo) | [abrir](unidad-1/semana-03_T1_avance-1) | ✅ |
 | 4 | Tarea 1 · Avance 2 (+ diseño detallado, avance del artículo) | [abrir](unidad-1/semana-04_T1_avance-2) | 🔄 |
 | 5 | Tarea 1 · Avance 3 con PLAN DE PRUEBAS | [abrir](unidad-1/semana-05_T1_avance-3-plan-de-pruebas) | ⏳ |
 | 5 | Foro · Casos de prueba del proyecto (mínimo 5) | [abrir](unidad-1/semana-05_foro_casos-de-prueba) | ⏳ |
@@ -42,18 +45,18 @@ Leyenda: ⏳ pendiente · 🔄 en progreso · ✅ entregado
 
 ## Integrantes
 
-| # | Apellidos y nombres | GitHub | Responsabilidad principal |
+| # | Apellidos y nombres | GitHub | Responsabilidad principal (documento maestro §12.1) |
 |:---:|---|---|---|
-| 1 | Alvarado Vargas Jostin Paul | | |
-| 2 | Castillo Torres Aaron Andrés | | |
-| 3 | Gutiérrez Muñoz Alan Daniel | [@AlanDaniel-arch](https://github.com/AlanDaniel-arch) | Organización del repositorio e integración |
-| 4 | Martínez Tomalá Marcos Williams | | |
-| 5 | Mina Guacho Andrea Rosario | | |
-| 6 | Monge Dorado Esther Betzabeth | | |
-| 7 | Olvera Suarez Jefferson Lenin | | |
-| 8 | Ordoñez Zeas Luis Alberto | | |
-| 9 | Requelme Quinto Jostin Jair | | |
-| 10 | Tenegusñay Tiban Belinda Elizabeth | | |
+| 1 | Alvarado Vargas Jostin Paul | [@JxstinAlvarado](https://github.com/JxstinAlvarado) | Alcance del proyecto y requerimientos (S2) |
+| 2 | Castillo Torres Aaron Andrés | [@aa1218-a](https://github.com/aa1218-a) | Avance 1 e integración del repositorio (S3) |
+| 3 | Gutiérrez Muñoz Alan Daniel | [@AlanDaniel-arch](https://github.com/AlanDaniel-arch) | Administración del repositorio, integración y Avance 2 (S4) |
+| 4 | Martínez Tomalá Marcos Williams | [@MarckT17](https://github.com/MarckT17) | Avance 3 y plan de pruebas (S5) |
+| 5 | Mina Guacho Andrea Rosario | [@andreathv2](https://github.com/andreathv2) | Entrega parcial: pruebas y tolerancia a fallos (S6) |
+| 6 | Monge Dorado Esther Betzabeth | [@esthermonge1515-beep](https://github.com/esthermonge1515-beep) | Apoyo transversal (frente por asignar) |
+| 7 | Olvera Suarez Jefferson Lenin | [@jeydevs](https://github.com/jeydevs) | Entrega parcial: pruebas y tolerancia a fallos (S6) |
+| 8 | Ordoñez Zeas Luis Alberto | [@luisalberto95xx](https://github.com/luisalberto95xx) | Avance 3 y plan de pruebas (S5) |
+| 9 | Requelme Quinto Jostin Jair | [@requelemejair15-svg](https://github.com/requelemejair15-svg) | Coordinación, bitácoras y Avance 2 (S4) |
+| 10 | Tenegusñay Tiban Belinda Elizabeth | [@elizabethbelindat-del](https://github.com/elizabethbelindat-del) | Alcance del proyecto y requerimientos (S2) |
 
 El aporte de cada integrante se comprueba en el historial de commits, así que cada uno sube su parte desde su propia cuenta.
 
@@ -61,83 +64,94 @@ El aporte de cada integrante se comprueba en el historial de commits, así que c
 
 ## Tecnologías
 
-| Componente | Tecnología |
-| :--- | :--- |
-| Lenguaje | C# (.NET 8.0) |
-| IDE | Visual Studio 2022 / Visual Studio Code |
-| Framework / Librerías | .NET 8.0, MySql.Data |
-| Base de datos | MySQL 8.0 |
-| Pruebas unitarias | xUnit / MSTest (previsto en U1-S5) |
-| Control de versiones | Git + GitHub |
+Según el documento maestro (§6.1), el proyecto tiene un **prototipo funcional ya construido** y una **implementación objetivo** en construcción.
 
-El repositorio contiene **dos componentes** dentro de [`proyecto/src`](proyecto/src):
-
-| Carpeta | Qué es | Tecnología |
+| Capa | Prototipo funcional (Avance 1) | Implementación objetivo |
 | :--- | :--- | :--- |
-| [`SistemaGestionISP/`](proyecto/src/SistemaGestionISP) | Aplicación de consola con acceso a MySQL (línea principal del proyecto) | C# · .NET 8 · MySQL |
-| [`prototipo-web/`](proyecto/src/prototipo-web) | Prototipo de interfaz web de los cuatro módulos (datos de demostración en el navegador) | HTML · JavaScript · Tailwind |
+| Lenguaje | JavaScript (ES6) | C# |
+| Plataforma | Navegador web · Tailwind CSS 3.4 | .NET 8 · ASP.NET Core MVC |
+| Persistencia | `localStorage` del navegador | MySQL 8.0 · base `isp_gestion_db` |
+| Pruebas | Node.js 22 (`node:test`) | xUnit o MSTest (por confirmar) |
+| IDE | Visual Studio Code | Visual Studio Code + C# Dev Kit (o Visual Studio 2022) |
+| Control de versiones | Git + GitHub | Git + GitHub |
 
-Cada componente trae su propio script de base de datos en su carpeta `database/`. Ver [`proyecto/src/README.md`](proyecto/src/README.md).
+**Estado de la implementación objetivo:** la capa de **modelo y acceso a datos** en C# ya existe (`proyecto/src/SistemaGestionISP`, con una consola provisional para probarla). Los controladores, servicios y vistas de ASP.NET Core MVC están **por iniciar** (documento maestro §12.3). Todos los componentes usan la **misma base de datos**: [`proyecto/database`](proyecto/database).
 
 ## Cómo abrir y ejecutar el proyecto
 
-### A. Aplicación de consola C# (`proyecto/src/SistemaGestionISP`)
+Instrucciones probadas para Windows con Visual Studio Code (documento maestro §10.3).
 
-**Requisitos previos:** [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) o superior, MySQL Server 8.0 (con MySQL Workbench o el cliente `mysql`) y Visual Studio 2022 (o Visual Studio Code con la extensión *C# Dev Kit*).
+**Requisitos previos:** Git 2.40+, Visual Studio Code (recomendado: extensión *Live Server*), Chrome o Edge actualizados con conexión a Internet (el prototipo carga librerías desde CDN), Node.js 22+ (pruebas), MySQL Server 8.0 con MySQL Workbench y, para el código C#, el [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
-1. **Clonar** el repositorio:
+1. **Clonar** y abrir la carpeta en VS Code (`Archivo → Abrir carpeta`):
    ```bash
    git clone https://github.com/AlanDaniel-arch/UG-CSO-GrupoD-Construccion-de-Software.git
    cd UG-CSO-GrupoD-Construccion-de-Software
    ```
-2. **Crear la base de datos.** Con MySQL en ejecución, correr el script (crea la base `isp_gestion`, sus 5 tablas y 3 planes de ejemplo):
-   - *MySQL Workbench:* `File → Open SQL Script…` → `proyecto/src/SistemaGestionISP/database/isp_gestion.sql` → ejecutar todo (icono del rayo).
-   - *Línea de comandos:* `mysql -u root -p < proyecto/src/SistemaGestionISP/database/isp_gestion.sql`
-3. **Configurar la conexión.** Por defecto el programa usa `Server=localhost;Database=isp_gestion;Uid=root;Pwd=root;`. Si tu usuario o contraseña son otros, define la variable de entorno `ISP_DB_CONNECTION` **antes** de abrir el IDE (así la contraseña no queda en el código):
-   - *PowerShell:* `$env:ISP_DB_CONNECTION = "Server=localhost;Database=isp_gestion;Uid=root;Pwd=TU_CLAVE;"`
-   - *Visual Studio:* `Proyecto → Propiedades de SistemaGestionISP → Depurar → Abrir la interfaz de usuario de perfiles de inicio → Variables de entorno`.
-4. **Abrir en el IDE.**
-   - *Visual Studio 2022:* `Archivo → Abrir → Proyecto o solución…` y elegir `proyecto/src/SistemaGestionISP/SistemaGestionISP.csproj` (no hay archivo `.sln`). Visual Studio restaura el paquete NuGet `MySql.Data` automáticamente.
-   - *Visual Studio Code:* `File → Open Folder…` → `proyecto/src/SistemaGestionISP`.
-5. **Ejecutar:** `F5` o `Ctrl+F5` en Visual Studio, o desde una terminal:
+
+### A. Prototipo web (`proyecto/src/prototipo-web`)
+
+2. En el explorador de VS Code: clic derecho en `proyecto/src/prototipo-web/index.html` → **Open with Live Server** (o doble clic para abrirlo en el navegador).
+3. Ingresar con un perfil de demostración (las tarjetas de la pantalla de ingreso rellenan usuario y clave):
+
+   | Rol | Usuario | Contraseña |
+   |---|---|---|
+   | Administrador | `admin` | `admin123` |
+   | Gerente | `gerente` | `gerente123` |
+   | Secretario | `secretario` | `secretario123` |
+   | Cajero | `cajero` | `cajero123` |
+   | Técnico | `tecnico` | `tecnico123` |
+
+   *Credenciales ficticias solo para uso académico.* El prototipo guarda sus datos en el navegador; no usa MySQL.
+
+### B. Base de datos MySQL (`proyecto/database`)
+
+4. En MySQL Workbench: `File → Open SQL Script…` → `proyecto/database/base_datos_isp.sql` → botón del rayo. Debe quedar el esquema `isp_gestion_db` con **10 tablas**. Más detalle en [`proyecto/database/README.md`](proyecto/database/README.md).
+
+### C. Pruebas unitarias del prototipo
+
+5. En la terminal de VS Code, desde la raíz del repositorio:
+   ```bash
+   node --test proyecto/tests/prototipo.test.cjs
+   ```
+   Resultado esperado: **16 pruebas aprobadas, 0 fallidas**. Detalle en [`proyecto/tests/README.md`](proyecto/tests/README.md).
+
+### D. Capa de datos en C# (`proyecto/src/SistemaGestionISP`)
+
+*Requiere haber hecho el paso B.*
+
+6. Si tu usuario/contraseña de MySQL no son `root`/`root`, define la variable de entorno **antes** de abrir el IDE (así la contraseña no queda en el código):
+   - *PowerShell:* `$env:ISP_DB_CONNECTION = "Server=localhost;Database=isp_gestion_db;Uid=root;Pwd=TU_CLAVE;"`
+7. Ejecutar la consola de verificación:
    ```bash
    cd proyecto/src/SistemaGestionISP
    dotnet restore
    dotnet run
    ```
-   Se muestra un menú de consola con las opciones: registrar cliente, listar clientes, consultar planes y cambiar el estado del servicio.
+   *(En Visual Studio 2022: abrir `SistemaGestionISP.csproj` y pulsar `F5`.)* Menú: registrar cliente con contrato, listar clientes, consultar planes, ver y cambiar el estado del servicio.
 
 | Problema frecuente | Causa y solución |
 | :--- | :--- |
-| `Access denied for user 'root'` | La contraseña no coincide: definir `ISP_DB_CONNECTION` (paso 3). |
-| `Unknown database 'isp_gestion'` | No se ejecutó el script del paso 2. |
+| `Access denied for user 'root'` | La contraseña no coincide: definir `ISP_DB_CONNECTION` (paso 6). |
+| `Unknown database 'isp_gestion_db'` | No se ejecutó el script del paso 4. |
 | `Unable to connect to any of the specified MySQL hosts` | MySQL no está iniciado o no escucha en `localhost:3306`. |
+| `dotnet : no se reconoce…` | Falta instalar el .NET 8 SDK y reiniciar la terminal. |
 
-### B. Prototipo web (`proyecto/src/prototipo-web`)
+### E. Aplicación ASP.NET Core MVC
 
-1. Abrir `proyecto/src/prototipo-web/index.html` con doble clic (Chrome, Edge o Firefox). Necesita **conexión a Internet** para cargar Tailwind, íconos, generador de PDF y código QR desde sus CDN.
-2. Iniciar sesión con una cuenta de demostración (las tarjetas de la pantalla de ingreso rellenan usuario y clave): `admin`, `gerente`, `secretario`, `cajero` o `tecnico`.
-3. *(Opcional)* La base MySQL equivalente a los datos de demostración está en `proyecto/src/prototipo-web/database/base_datos_isp.sql` (crea `isp_gestion_db`); el prototipo no se conecta a ella, guarda sus datos en el navegador.
-
-### C. Pruebas unitarias del prototipo
-
-Con **Node.js 22 o superior**, desde la raíz del repositorio:
-
-```bash
-node --test proyecto/tests/prototipo.test.cjs
-```
-
-Más detalle en [`proyecto/tests/README.md`](proyecto/tests/README.md). Las pruebas de la aplicación C# (xUnit/MSTest) están previstas para la semana 5.
+*Por iniciar.* Cuando exista: configurar la cadena de conexión en `appsettings.json` y ejecutar `dotnet restore`, `dotnet build`, `dotnet run` y `dotnet test`.
 
 ---
 
 ## Estructura
 
 ```
+├── README.md                    Esta portada
+├── NOTAS_PARA_EL_EQUIPO.md      Guía de entrada: qué cambió, qué falta y quién hace qué
 ├── unidad-1/
-│   ├── semana-02_T2_alcance-del-proyecto/
-│   ├── semana-03_T1_avance-1/
-│   ├── semana-04_T1_avance-2/
+│   ├── semana-02_T2_alcance-del-proyecto/      Alcance, requerimientos y diseño (v1)
+│   ├── semana-03_T1_avance-1/                  Avance 1: prototipo funcional + artículo
+│   ├── semana-04_T1_avance-2/                  Avance 2: DOCUMENTO MAESTRO V2, code smells, artículo
 │   ├── semana-05_T1_avance-3-plan-de-pruebas/
 │   ├── semana-05_foro_casos-de-prueba/
 │   ├── semana-06_T1_entrega-parcial/
@@ -147,15 +161,18 @@ Más detalle en [`proyecto/tests/README.md`](proyecto/tests/README.md). Las prue
 │   └── semana-10_T1_avance-6-plan-de-mantenimiento/
 ├── unidad-3/
 ├── proyecto/
+│   ├── database/                Script SQL único (isp_gestion_db, 10 tablas) y cambios pendientes
 │   ├── src/
-│   │   ├── SistemaGestionISP/   App de consola C# (Models, Data, Repositories, database/)
-│   │   └── prototipo-web/       Prototipo web (index.html, js/, database/)
-│   └── tests/      Pruebas unitarias y plan de pruebas
-├── bitacoras/      Minutas BIT_NN_GRUPO-D_DDMMAAAA
-└── plantillas/     Plantillas del docente
+│   │   ├── prototipo-web/       Prototipo funcional (index.html, js/)
+│   │   └── SistemaGestionISP/   Capa de modelo y datos en C# + consola de verificación
+│   └── tests/                   Pruebas unitarias y plan de pruebas
+├── bitacoras/                   Minutas BIT_NN_GRUPO-D_DDMMAAAA
+└── plantillas/                  Plantillas del docente
 ```
 
 Los documentos de cada entrega van en la carpeta de su semana. El código es uno solo y vive en `proyecto/`; su estado en cada entrega queda guardado con un **tag** (ej. `U1-S03-avance-1`).
+
+> **Rutas del documento maestro V2 → rutas actuales.** El V2 se escribió antes de ordenar `proyecto/src` y menciona `proyecto/src/index.html.html` y `proyecto/src/base_datos_isp..sql`. Hoy son [`proyecto/src/prototipo-web/index.html`](proyecto/src/prototipo-web/index.html) y [`proyecto/database/base_datos_isp.sql`](proyecto/database/base_datos_isp.sql).
 
 ## Reglas de trabajo
 

@@ -19,8 +19,8 @@
 
 | Parte | Integrante(s) | Estado |
 |---|---|---|
-| | | |
 
 ### Archivos de esta entrega
 
-_Se listan aquí con enlace cuando se suban._
+- Diseño de las excepciones: V2 §9 ([PDF](../semana-04_T1_avance-2/Diseno_Detallado_GrupoD_v2.pdf)). La rama `jefferson/u1-s6-tolerancia-fallos` está basada en la estructura antigua: rehacer sobre `proyecto/src/SistemaGestionISP/Repositories`.
+- _Archivos de la entrega: se enlazan aquí cuando se suban._

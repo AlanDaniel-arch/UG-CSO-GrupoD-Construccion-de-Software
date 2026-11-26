@@ -3,16 +3,19 @@ using SistemaGestionISP.Models;
 
 namespace SistemaGestionISP.Repositories
 {
-    /// <summary>Operaciones de persistencia de clientes y de su estado de servicio (Módulos 1 y 4).</summary>
+    /// <summary>Persistencia de clientes y contratos (Módulo 1 · RF-04, RF-05).</summary>
     public interface IClienteRepositorio
     {
-        /// <summary>Inserta un cliente nuevo. Devuelve true si se guardó.</summary>
-        bool Registrar(Cliente cliente);
+        /// <summary>
+        /// RF-04: registra un cliente junto con su contrato y el servicio asociado, todo en una
+        /// sola transacción (si algo falla no queda nada a medias). Devuelve el código del contrato creado.
+        /// </summary>
+        /// <exception cref="MySql.Data.MySqlClient.MySqlException">
+        /// Identificación repetida (RN-01, error 1062) o plan inexistente (clave foránea).
+        /// </exception>
+        string RegistrarConContrato(Cliente cliente, int idPlan);
 
-        /// <summary>Devuelve todos los clientes registrados.</summary>
-        List<Cliente> Listar();
-
-        /// <summary>Cambia el estado del servicio de un cliente. Devuelve false si el cliente no existe.</summary>
-        bool ActualizarEstadoServicio(int idCliente, EstadoServicio nuevoEstado);
+        /// <summary>RF-05: lista los clientes con su plan y el estado de su contrato.</summary>
+        List<ClienteResumen> Listar();
     }
 }

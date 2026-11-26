@@ -17,7 +17,7 @@
     const STORAGE_KEY = 'ug_isp_grupoD_state_v1';
 
     // Datos de demostración. Reflejan los mismos registros que el script SQL
-    // database/base_datos_isp.sql (mantener ambos sincronizados). Contiene una
+    // proyecto/database/base_datos_isp.sql (mantener ambos sincronizados). Contiene una
     // colección por cada tabla de negocio: planes, clientes (con su contrato y
     // servicio embebidos), equipos, facturas, pagos y tickets de soporte.
     const DEFAULT_STATE = {
