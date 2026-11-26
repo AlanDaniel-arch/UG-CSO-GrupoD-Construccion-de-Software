@@ -41,7 +41,7 @@ function loadScript(file, dependencies = {}) {
     window: {},
     ...dependencies
   });
-  const filename = path.join(__dirname, '..', 'src', file);
+  const filename = path.join(__dirname, '..', 'src', 'prototipo-web', 'js', file);
   vm.runInContext(readFileSync(filename, 'utf8'), context, { filename });
   return { context, element, evaluate: code => vm.runInContext(code, context) };
 }

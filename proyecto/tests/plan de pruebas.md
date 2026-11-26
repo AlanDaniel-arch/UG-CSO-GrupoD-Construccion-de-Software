@@ -9,7 +9,7 @@ Verificar el inicio de sesión con cada cuenta de demostración y los permisos d
 ### Entorno y precondiciones
 
 - Ejecución del 25 de noviembre de 2026 en Windows, con Google Chrome 158.0.8127.37 en modo sin interfaz.
-- Abrir `../src/index.html.html` como archivo local, con un perfil limpio y los datos de demostración. Los datos iniciales permiten comprobar acciones asociadas a filas y tarjetas.
+- Abrir `../src/prototipo-web/index.html` como archivo local, con un perfil limpio y los datos de demostración. Los datos iniciales permiten comprobar acciones asociadas a filas y tarjetas.
 - Comenzar cada caso desde la pantalla de ingreso. Usar las credenciales que muestra la tarjeta de demostración del rol correspondiente.
 
 ### Permisos esperados
@@ -60,7 +60,7 @@ El panel principal está disponible para los cinco roles. La edición de Soporte
 
 ### Entorno y procedimiento común para los cuatro módulos
 
-La ejecución del 25 de noviembre de 2026 usó Chrome 158.0.8127.37 en modo sin interfaz, con un perfil limpio y `../src/index.html.html` abierto como archivo local. Se usaron los datos de demostración y se inició sesión con el rol indicado en cada apartado.
+La ejecución del 25 de noviembre de 2026 usó Chrome 158.0.8127.37 en modo sin interfaz, con un perfil limpio y `../src/prototipo-web/index.html` abierto como archivo local. Se usaron los datos de demostración y se inició sesión con el rol indicado en cada apartado.
 
 En cada alta o edición, se completó el formulario, se vació el campo obligatorio indicado y se intentó guardar. Chrome bloqueó el envío mediante su validación nativa y el almacenamiento quedó igual. Al pulsar **Cancelar**, se cerró el formulario sin guardar. Luego se abrió nuevamente, se completó y se guardó. Para comprobar persistencia, se recargó la misma pestaña y se consultaron los registros creados.
 

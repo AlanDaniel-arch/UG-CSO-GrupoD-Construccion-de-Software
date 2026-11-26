@@ -4,8 +4,8 @@
 Asignatura: Construcción de Software (611) · Paralelo SOF-S-NO-6-7 (Virtual) · Ciclo II 2026-2027
 Docente: Ph.D. Franklin Ricardo Parrales Bravo
 
-> **Proyecto:** _[NOMBRE DEL PROYECTO — pendiente de definir]_
-> _[Descripción en 2-3 líneas: qué problema resuelve y para quién.]_
+> **Proyecto:** Sistema de Gestión de Clientes, Planes y Facturación para un ISP (proveedor de Internet)
+> Centraliza el registro de clientes y contratos, el catálogo de planes y equipos, la facturación con registro de pagos y el control del estado del servicio con soporte básico, para el personal administrativo y técnico de un proveedor de Internet.
 
 Este es el repositorio único del Grupo D. Su enlace es el que se entrega en **todas** las tareas grupales del aula virtual. Cada actividad tiene su propia carpeta, ordenada por **unidad → semana → actividad**, con la lista de lo que pide el docente y los archivos entregados.
 
@@ -19,7 +19,7 @@ Este es el repositorio único del Grupo D. Su enlace es el que se entrega en **t
 |:---:|---|---|:---:|
 | 2 | Tarea 2 · Alcance del proyecto grupal (Diseño Detallado corregido, alcance, requerimientos, tecnologías) | [abrir](unidad-1/semana-02_T2_alcance-del-proyecto) | ⏳ |
 | 3 | Tarea 1 · Avance 1 (código comentado, IDE, avance del artículo) | [abrir](unidad-1/semana-03_T1_avance-1) | ⏳ |
-| 4 | Tarea 1 · Avance 2 (+ diseño detallado, avance del artículo) | [abrir](unidad-1/semana-04_T1_avance-2) | ⏳ |
+| 4 | Tarea 1 · Avance 2 (+ diseño detallado, avance del artículo) | [abrir](unidad-1/semana-04_T1_avance-2) | 🔄 |
 | 5 | Tarea 1 · Avance 3 con PLAN DE PRUEBAS | [abrir](unidad-1/semana-05_T1_avance-3-plan-de-pruebas) | ⏳ |
 | 5 | Foro · Casos de prueba del proyecto (mínimo 5) | [abrir](unidad-1/semana-05_foro_casos-de-prueba) | ⏳ |
 | 6 | Tarea 1 · ENTREGA PARCIAL con PLAN DE PRUEBAS y TOLERANCIA A FALLOS (+ artículo) | [abrir](unidad-1/semana-06_T1_entrega-parcial) | ⏳ |
@@ -70,14 +70,65 @@ El aporte de cada integrante se comprueba en el historial de commits, así que c
 | Pruebas unitarias | xUnit / MSTest (previsto en U1-S5) |
 | Control de versiones | Git + GitHub |
 
+El repositorio contiene **dos componentes** dentro de [`proyecto/src`](proyecto/src):
+
+| Carpeta | Qué es | Tecnología |
+| :--- | :--- | :--- |
+| [`SistemaGestionISP/`](proyecto/src/SistemaGestionISP) | Aplicación de consola con acceso a MySQL (línea principal del proyecto) | C# · .NET 8 · MySQL |
+| [`prototipo-web/`](proyecto/src/prototipo-web) | Prototipo de interfaz web de los cuatro módulos (datos de demostración en el navegador) | HTML · JavaScript · Tailwind |
+
+Cada componente trae su propio script de base de datos en su carpeta `database/`. Ver [`proyecto/src/README.md`](proyecto/src/README.md).
+
 ## Cómo abrir y ejecutar el proyecto
 
-_Requisito de todas las entregas. Se completa con la primera versión del código._
+### A. Aplicación de consola C# (`proyecto/src/SistemaGestionISP`)
 
-1. Requisitos previos: Tener instalado .NET 8.0 SDK (o superior), MySQL Server 8.0 y Visual Studio 2022.
-2. Clonar el repositorio:
+**Requisitos previos:** [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) o superior, MySQL Server 8.0 (con MySQL Workbench o el cliente `mysql`) y Visual Studio 2022 (o Visual Studio Code con la extensión *C# Dev Kit*).
+
+1. **Clonar** el repositorio:
    ```bash
    git clone https://github.com/AlanDaniel-arch/UG-CSO-GrupoD-Construccion-de-Software.git
+   cd UG-CSO-GrupoD-Construccion-de-Software
+   ```
+2. **Crear la base de datos.** Con MySQL en ejecución, correr el script (crea la base `isp_gestion`, sus 5 tablas y 3 planes de ejemplo):
+   - *MySQL Workbench:* `File → Open SQL Script…` → `proyecto/src/SistemaGestionISP/database/isp_gestion.sql` → ejecutar todo (icono del rayo).
+   - *Línea de comandos:* `mysql -u root -p < proyecto/src/SistemaGestionISP/database/isp_gestion.sql`
+3. **Configurar la conexión.** Por defecto el programa usa `Server=localhost;Database=isp_gestion;Uid=root;Pwd=root;`. Si tu usuario o contraseña son otros, define la variable de entorno `ISP_DB_CONNECTION` **antes** de abrir el IDE (así la contraseña no queda en el código):
+   - *PowerShell:* `$env:ISP_DB_CONNECTION = "Server=localhost;Database=isp_gestion;Uid=root;Pwd=TU_CLAVE;"`
+   - *Visual Studio:* `Proyecto → Propiedades de SistemaGestionISP → Depurar → Abrir la interfaz de usuario de perfiles de inicio → Variables de entorno`.
+4. **Abrir en el IDE.**
+   - *Visual Studio 2022:* `Archivo → Abrir → Proyecto o solución…` y elegir `proyecto/src/SistemaGestionISP/SistemaGestionISP.csproj` (no hay archivo `.sln`). Visual Studio restaura el paquete NuGet `MySql.Data` automáticamente.
+   - *Visual Studio Code:* `File → Open Folder…` → `proyecto/src/SistemaGestionISP`.
+5. **Ejecutar:** `F5` o `Ctrl+F5` en Visual Studio, o desde una terminal:
+   ```bash
+   cd proyecto/src/SistemaGestionISP
+   dotnet restore
+   dotnet run
+   ```
+   Se muestra un menú de consola con las opciones: registrar cliente, listar clientes, consultar planes y cambiar el estado del servicio.
+
+| Problema frecuente | Causa y solución |
+| :--- | :--- |
+| `Access denied for user 'root'` | La contraseña no coincide: definir `ISP_DB_CONNECTION` (paso 3). |
+| `Unknown database 'isp_gestion'` | No se ejecutó el script del paso 2. |
+| `Unable to connect to any of the specified MySQL hosts` | MySQL no está iniciado o no escucha en `localhost:3306`. |
+
+### B. Prototipo web (`proyecto/src/prototipo-web`)
+
+1. Abrir `proyecto/src/prototipo-web/index.html` con doble clic (Chrome, Edge o Firefox). Necesita **conexión a Internet** para cargar Tailwind, íconos, generador de PDF y código QR desde sus CDN.
+2. Iniciar sesión con una cuenta de demostración (las tarjetas de la pantalla de ingreso rellenan usuario y clave): `admin`, `gerente`, `secretario`, `cajero` o `tecnico`.
+3. *(Opcional)* La base MySQL equivalente a los datos de demostración está en `proyecto/src/prototipo-web/database/base_datos_isp.sql` (crea `isp_gestion_db`); el prototipo no se conecta a ella, guarda sus datos en el navegador.
+
+### C. Pruebas unitarias del prototipo
+
+Con **Node.js 22 o superior**, desde la raíz del repositorio:
+
+```bash
+node --test proyecto/tests/prototipo.test.cjs
+```
+
+Más detalle en [`proyecto/tests/README.md`](proyecto/tests/README.md). Las pruebas de la aplicación C# (xUnit/MSTest) están previstas para la semana 5.
+
 ---
 
 ## Estructura
@@ -96,8 +147,10 @@ _Requisito de todas las entregas. Se completa con la primera versión del códig
 │   └── semana-10_T1_avance-6-plan-de-mantenimiento/
 ├── unidad-3/
 ├── proyecto/
-│   ├── src/        Código fuente comentado (crece semana a semana)
-│   └── tests/      Pruebas unitarias
+│   ├── src/
+│   │   ├── SistemaGestionISP/   App de consola C# (Models, Data, Repositories, database/)
+│   │   └── prototipo-web/       Prototipo web (index.html, js/, database/)
+│   └── tests/      Pruebas unitarias y plan de pruebas
 ├── bitacoras/      Minutas BIT_NN_GRUPO-D_DDMMAAAA
 └── plantillas/     Plantillas del docente
 ```

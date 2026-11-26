@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Script de creación de Base de Datos - Sistema de Gestión ISP (Grupo D)
--- Asignatura: Construcción de Software | Avance 1 (U1 - S3)
+-- Asignatura: Construcción de Software | Avance 1 (U1 - S3), revisado en Avance 2 (U1 - S4)
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS isp_gestion;
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 -- Módulo 2: Gestión de Planes y Equipos
 CREATE TABLE IF NOT EXISTS planes_internet (
     id_plan INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_plan VARCHAR(80) NOT NULL,
+    nombre_plan VARCHAR(80) NOT NULL UNIQUE,
     velocidad_mbps INT NOT NULL,
     precio_mensual DECIMAL(10, 2) NOT NULL
 );
@@ -57,8 +57,9 @@ CREATE TABLE IF NOT EXISTS tickets_soporte (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
 
--- Datos semilla iniciales para pruebas del Avance 1
-INSERT INTO planes_internet (nombre_plan, velocidad_mbps, precio_mensual) VALUES
+-- Datos semilla iniciales para pruebas.
+-- INSERT IGNORE + UNIQUE(nombre_plan): si el script se ejecuta dos veces no duplica los planes.
+INSERT IGNORE INTO planes_internet (nombre_plan, velocidad_mbps, precio_mensual) VALUES
 ('Plan Hogar Básico 50 Mbps', 50, 22.50),
 ('Plan Hogar Plus 100 Mbps', 100, 30.00),
 ('Plan Fibra Pro 300 Mbps', 300, 45.00);

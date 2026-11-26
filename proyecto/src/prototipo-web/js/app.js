@@ -1,5 +1,25 @@
+    /**
+     * app.js — Estado, datos de demostración y renderizado de las vistas.
+     * Proyecto: Sistema de Gestión de Clientes, Planes y Facturación para ISP (Grupo D).
+     *
+     * Responsabilidades de este archivo:
+     *   1. Definir el estado de la aplicación (`state`) y sus datos iniciales.
+     *   2. Persistir/recuperar el estado en el navegador (localStorage).
+     *   3. Dibujar cada módulo: Panel, Clientes, Planes y Equipos, Facturación y Soporte.
+     *   4. Exportar los datos (JSON y PDF) y mostrar el contacto con QR a WhatsApp.
+     *
+     * Orden de carga (ver index.html): app.js → forms.js → auth.js.
+     * Los tres scripts comparten el ámbito global; forms.js y auth.js usan `state`,
+     * `renderAll()`, `showToast()` y demás funciones definidas aquí.
+     */
+
+    // Clave con la que el estado completo se guarda en localStorage (versionada: v1).
     const STORAGE_KEY = 'ug_isp_grupoD_state_v1';
 
+    // Datos de demostración. Reflejan los mismos registros que el script SQL
+    // database/base_datos_isp.sql (mantener ambos sincronizados). Contiene una
+    // colección por cada tabla de negocio: planes, clientes (con su contrato y
+    // servicio embebidos), equipos, facturas, pagos y tickets de soporte.
     const DEFAULT_STATE = {
       planes: [
         { id: 'PLN-01', nombre: 'Fibra Hogar 100', velocidad: '100 Mbps', precio: 25.00, descripcion: 'Ideal para navegación, teletrabajo y streaming HD.', estado: 'Activo' },
@@ -46,8 +66,15 @@
       ]
     };
 
+    // Estado vivo de la aplicación; toda la interfaz se dibuja a partir de él.
     let state = loadState();
 
+    /**
+     * Recupera el estado guardado en localStorage.
+     * Si no existe o el JSON es inválido (tolerancia a fallos), devuelve una copia
+     * profunda de DEFAULT_STATE para no modificar la constante original.
+     * @returns {object} estado de la aplicación
+     */
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -56,10 +83,19 @@
       return JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
 
+    /**
+     * Guarda el estado actual en localStorage.
+     * El error se ignora a propósito: si el navegador bloquea el almacenamiento
+     * (modo privado, cuota llena) la aplicación sigue funcionando sin persistir.
+     */
     function saveState() {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
     }
 
+    /**
+     * Muestra un aviso temporal (toast) en la esquina inferior derecha por 2,8 s.
+     * @param {string} msg texto a mostrar
+     */
     function showToast(msg) {
       const toast = document.getElementById('toast');
       document.getElementById('toast-msg').textContent = msg;
@@ -72,6 +108,12 @@
       }, 2800);
     }
 
+    /**
+     * Devuelve el HTML de una etiqueta (badge) de color según el estado recibido.
+     * Verde = bien, ámbar = en curso, rojo = atención, gris = inactivo/cancelado.
+     * @param {string} status estado de contrato, factura, equipo o ticket
+     * @returns {string} fragmento HTML
+     */
     function badge(status) {
       const map = {
         'Activo': 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -92,21 +134,31 @@
       return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${cls}">${status}</span>`;
     }
 
+    // --- Funciones de consulta sobre el estado (búsqueda por identificador) ---
+
+    /** Nombre y velocidad del plan; si no existe devuelve el propio identificador. */
     function getPlanName(planId) {
       const p = state.planes.find(x => x.id === planId);
       return p ? `${p.nombre} (${p.velocidad})` : planId;
     }
 
+    /** Nombre del cliente; si no existe devuelve el propio identificador. */
     function getClientName(clienteId) {
       const c = state.clientes.find(x => x.id === clienteId);
       return c ? c.nombre : clienteId;
     }
 
+    /** Fecha actual en formato ISO (AAAA-MM-DD), usada como valor por defecto en formularios. */
     function todayISO() {
       return new Date().toISOString().slice(0, 10);
     }
 
     // --- NAVIGATION ---
+    /**
+     * Cambia la vista (módulo) visible y resalta su botón del menú.
+     * Si el usuario no tiene permiso para la vista pedida, redirige al panel.
+     * @param {string} viewName dashboard | clientes | planes | facturacion | soporte
+     */
     function switchView(viewName) {
       if (!canView(viewName)) viewName = 'dashboard';
       document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
@@ -125,6 +177,11 @@
       renderAll();
     }
 
+    /**
+     * Enlaza los botones de una barra de subpestañas con sus paneles.
+     * @param {string} btnClass clase CSS de los botones de la barra
+     * @param {string} panelPrefix prefijo del id de los paneles a ocultar
+     */
     function bindSubtabs(btnClass, panelPrefix) {
       document.querySelectorAll('.' + btnClass).forEach(btn => {
         btn.addEventListener('click', () => {
@@ -143,6 +200,7 @@
     }
 
     // --- RENDER FUNCTIONS ---
+    /** Módulo Panel: calcula y dibuja los indicadores (KPI) y los resúmenes de facturas pendientes y tickets abiertos. */
     function renderDashboard() {
       const activos = state.clientes.filter(c => c.estadoContrato === 'Activo').length;
       const recaudado = state.pagos.reduce((s, p) => s + Number(p.valor || 0), 0);
@@ -216,6 +274,7 @@
       }
     }
 
+    /** Módulo 1 · Clientes y Contratos: aplica el buscador y el filtro de estado y dibuja la tabla. */
     function renderClientes() {
       const q = (document.getElementById('search-clients').value || '').toLowerCase().trim();
       const status = document.getElementById('filter-contract-status').value;
@@ -250,6 +309,7 @@
       `).join('');
     }
 
+    /** Módulo 2 · Planes y Equipos: dibuja las tarjetas de planes y la tabla de equipos CPE/ONT. */
     function renderPlanesYEquipos() {
       const planesEl = document.getElementById('subpanel-planes-list');
       planesEl.innerHTML = state.planes.map(p => `
@@ -292,6 +352,7 @@
       `).join('');
     }
 
+    /** Módulo 3 · Facturación y Pagos: dibuja la tabla de facturas (con filtro) y el historial de pagos. */
     function renderFacturacion() {
       const fStatus = document.getElementById('filter-invoice-status').value;
       const list = state.facturas.filter(f => fStatus === 'ALL' || f.estado === fStatus);
@@ -338,6 +399,11 @@
       }
     }
 
+    /**
+     * Módulo 4 · Estado de Servicio y Soporte: dibuja el estado del servicio de cada
+     * cliente y la tabla de tickets; el botón de cada ticket avanza su estado
+     * (Abierto → En proceso → Resuelto).
+     */
     function renderSoporte() {
       const sBody = document.getElementById('servicios-tbody');
       sBody.innerHTML = state.clientes.map(c => `
@@ -384,6 +450,7 @@
       }
     }
 
+    /** Redibuja todas las vistas y vuelve a aplicar los permisos del rol activo (auth.js). */
     function renderAll() {
       renderDashboard();
       renderClientes();
@@ -395,6 +462,10 @@
     }
 
     // --- EVENT LISTENERS ---
+    // ---------------------------------------------------------------------
+    //  Eventos de navegación, subpestañas, filtros y exportación
+    // ---------------------------------------------------------------------
+    // Menú principal y accesos rápidos del panel.
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
@@ -402,6 +473,7 @@
       btn.addEventListener('click', () => switchView(btn.dataset.jump));
     });
 
+    // Subpestañas de cada módulo (Planes/Equipos, Facturas/Pagos, Servicios/Tickets).
     bindSubtabs('planes-subtab', 'subpanel-planes-list');
     // Also handle planes/equipos toggling cleanly
     document.querySelectorAll('.planes-subtab').forEach(btn => {
@@ -427,10 +499,12 @@
       });
     });
 
+    // Filtros en vivo de Clientes y Facturación.
     document.getElementById('search-clients').addEventListener('input', renderClientes);
     document.getElementById('filter-contract-status').addEventListener('change', renderClientes);
     document.getElementById('filter-invoice-status').addEventListener('change', renderFacturacion);
 
+    // Restaurar datos de demostración (solo visible para el Administrador).
     document.getElementById('btn-reset-demo').addEventListener('click', () => {
       state = JSON.parse(JSON.stringify(DEFAULT_STATE));
       saveState();
@@ -438,6 +512,7 @@
       showToast('Datos de demostración restaurados.');
     });
 
+    // Exportar el estado completo como archivo JSON descargable.
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -463,6 +538,7 @@
     // =====================================================
     //  CONTACTO + QR A WHATSAPP
     // =====================================================
+    /** Muestra los datos de contacto y genera el código QR que abre un chat de WhatsApp con el mensaje predefinido. */
     function setupContacto() {
       const url = `https://wa.me/${CONTACTO.whatsapp}?text=${encodeURIComponent(CONTACTO.mensaje)}`;
       document.getElementById('contact-phone').textContent = CONTACTO.telefonoVisible;
@@ -481,6 +557,12 @@
     // =====================================================
     //  EXPORTAR PDF
     // =====================================================
+    /**
+     * Genera el reporte general en PDF (jsPDF + autoTable): resumen, siete tablas
+     * (clientes, planes, equipos, facturas, pagos, servicios y soporte) y pie con
+     * contacto y numeración. Al terminar ofrece enviarlo por correo (forms.js).
+     * Requiere conexión para cargar las librerías desde su CDN.
+     */
     function exportPDF() {
       if (!(window.jspdf && window.jspdf.jsPDF)) { showToast('No se pudo cargar la librería de PDF. Revisa tu conexión.'); return; }
       const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });

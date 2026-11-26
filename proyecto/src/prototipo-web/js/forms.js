@@ -1,6 +1,22 @@
+    /**
+     * forms.js — Ventana modal y formularios de alta/edición de los cuatro módulos.
+     *
+     * Patrón común: cada `openXxxModal()` arma los campos HTML y entrega a
+     * `openModal()` una función `onSubmit(FormData)` que modifica `state`, guarda
+     * con `saveState()` y vuelve a dibujar con `renderAll()` (definidos en app.js).
+     * Con `existingId` el formulario edita un registro; sin él, crea uno nuevo.
+     */
+
+    // Función que se ejecuta al enviar el formulario de la ventana modal abierta.
     let currentModalHandler = null;
 
     // --- MODAL HELPERS ---
+    /**
+     * Abre la ventana modal genérica.
+     * @param {string} title título de la ventana
+     * @param {string} fieldsHtml campos del formulario (HTML)
+     * @param {function(FormData):void} onSubmit acción al guardar
+     */
     function openModal(title, fieldsHtml, onSubmit) {
       document.getElementById('modal-title').textContent = title;
       document.getElementById('modal-fields').innerHTML = fieldsHtml;
@@ -11,6 +27,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
+    /** Cierra la ventana modal y descarta el manejador pendiente. */
     function closeModal() {
       const bg = document.getElementById('modal-backdrop');
       bg.classList.add('hidden');
@@ -18,6 +35,7 @@
       currentModalHandler = null;
     }
 
+    /** Módulo 1: alta/edición de cliente junto con su contrato. La cédula no se puede editar. */
     function openClientModal(existingId = null) {
       const c = existingId ? state.clientes.find(x => x.id === existingId) : null;
       const planOptions = state.planes.map(p =>
@@ -96,6 +114,7 @@
       });
     }
 
+    /** Módulo 2: alta/edición de un plan de internet. El código no se puede editar. */
     function openPlanModal(existingId = null) {
       const p = existingId ? state.planes.find(x => x.id === existingId) : null;
       const nextId = 'PLN-' + String(state.planes.length + 1).padStart(2, '0');
@@ -146,6 +165,7 @@
       });
     }
 
+    /** Módulo 2: alta/edición de un equipo (CPE/ONT/router) y su contrato asociado. */
     function openEquipModal(existingId = null) {
       const e = existingId ? state.equipos.find(x => x.id === existingId) : null;
       const nextId = 'EQ-' + String(state.equipos.length + 1).padStart(3, '0');
@@ -209,6 +229,7 @@
       });
     }
 
+    /** Módulo 3: emisión de una factura nueva en estado «Pendiente». */
     function openInvoiceModal() {
       const nextId = 'FAC-2026-' + (101 + state.facturas.length);
       const clientOpts = state.clientes.map(c => {
@@ -256,6 +277,10 @@
       });
     }
 
+    /**
+     * Módulo 3: registra el pago de una factura. Crea el pago y marca la factura
+     * como «Pagada». El valor pagado es siempre el total de la factura.
+     */
     function openPayModal(facturaId) {
       const f = state.facturas.find(x => x.id === facturaId);
       if (!f) return;
@@ -301,6 +326,7 @@
       });
     }
 
+    /** Módulo 4: registra una solicitud de soporte técnico en estado «Abierto». */
     function openTicketModal() {
       const nextId = 'SOP-' + String(state.tickets.length + 1).padStart(3, '0');
       const clientOpts = state.clientes.map(c => `<option value="${c.id}">${c.nombre} (${c.contrato})</option>`).join('');
@@ -339,6 +365,7 @@
 
     // Eventos de los formularios.
 
+    // Botones que abren cada formulario (accesos rápidos del panel y de cada módulo).
     document.getElementById('quick-add-client').addEventListener('click', () => openClientModal());
     document.getElementById('btn-open-client-modal').addEventListener('click', () => openClientModal());
     document.getElementById('btn-open-plan-modal').addEventListener('click', () => openPlanModal());
@@ -349,6 +376,7 @@
     document.getElementById('btn-close-modal').addEventListener('click', closeModal);
     document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
 
+    // Envío del formulario modal: ejecuta el manejador actual y cierra la ventana.
     document.getElementById('modal-form').addEventListener('submit', (e) => {
       e.preventDefault();
       if (currentModalHandler) {
@@ -358,6 +386,8 @@
     });
 
     // Event delegation for dynamic table/card actions
+    // Delegación de eventos: los botones de tablas y tarjetas se crean al dibujar,
+    // por eso se escucha el clic en `document` y se identifica el botón por su atributo data-*.
     document.addEventListener('click', (e) => {
       const editClient = e.target.closest('[data-edit-client]');
       if (editClient) return openClientModal(editClient.dataset.editClient);
@@ -391,6 +421,7 @@
       }
     });
 
+    // Cambio de estado del servicio desde la lista desplegable del módulo Soporte.
     document.addEventListener('change', (e) => {
       const srv = e.target.closest('[data-change-service]');
       if (srv) {
@@ -404,6 +435,11 @@
       }
     });
 
+    /**
+     * Tras exportar el PDF, ofrece abrir el cliente de correo (mailto:) con asunto y
+     * mensaje listos. El navegador no puede adjuntar el archivo automáticamente.
+     * @param {string} pdfFilename nombre del PDF recién descargado
+     */
     function openSendEmailModal(pdfFilename) {
       const asuntoDefault = `Reporte ISP Manager (${todayISO()})`;
       const cuerpoDefault = `Hola,\n\nTe comparto el reporte PDF recién descargado (${pdfFilename}) del Sistema de Gestión de Clientes, Planes y Facturación para ISP.\n\nPor favor revisa el archivo adjunto.\n\nSaludos,\n${currentUser ? currentUser.nombre : 'ISP Manager'}`;
